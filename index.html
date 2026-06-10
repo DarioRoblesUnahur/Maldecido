@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Maldecido</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Crimson+Text:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #06100a; overflow: hidden; font-family: 'Crimson Text', serif; }
+
+    #game-canvas-container { position: fixed; inset: 0; z-index: 0; }
+    #game-canvas-container canvas { display: block; width: 100% !important; height: 100% !important; }
+
+    /* ── vignette de daño ── */
+    #dano-overlay {
+      position: fixed; inset: 0; z-index: 15; pointer-events: none; opacity: 0;
+      transition: opacity 0.15s;
+      background: radial-gradient(ellipse at center, transparent 55%, rgba(150,0,0,0.85) 100%);
+    }
+
+    /* ── MENÚ ── */
+    #menu {
+      position: fixed; inset: 0; z-index: 500;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: radial-gradient(ellipse at 50% 35%, #15301a 0%, #06100a 70%);
+      transition: opacity 0.5s;
+    }
+    #menu.hidden { opacity: 0; pointer-events: none; }
+    .menu-logo {
+      font-family: 'Cinzel', serif; font-size: clamp(40px, 8vw, 82px); font-weight: 700;
+      color: #e8c870; text-shadow: 0 0 34px #7a9a3a88, 0 2px 0 #1a3a10;
+      letter-spacing: 0.06em; animation: glow 3s ease-in-out infinite alternate;
+    }
+    @keyframes glow { from { text-shadow: 0 0 18px #6a8a3066, 0 2px 0 #1a3a10; } to { text-shadow: 0 0 48px #c8e060aa, 0 2px 0 #1a3a10; } }
+    .menu-sub { font-style: italic; font-size: 17px; color: #7a9a55; margin-bottom: 50px; letter-spacing: 0.14em; }
+    .menu-nav { display: flex; flex-direction: column; gap: 13px; align-items: center; }
+    .menu-btn {
+      font-family: 'Cinzel', serif; font-size: 18px; letter-spacing: 0.07em; color: #d8e8a0;
+      background: linear-gradient(135deg, #122008, #1e3010, #122008);
+      border: 1px solid #5a7a2888; border-top-color: #9ac84855;
+      padding: 13px 56px; cursor: pointer; min-width: 290px; text-align: center; transition: all 0.2s;
+      clip-path: polygon(10px 0%,calc(100% - 10px) 0%,100% 10px,100% calc(100% - 10px),calc(100% - 10px) 100%,10px 100%,0% calc(100% - 10px),0% 10px);
+    }
+    .menu-btn:hover { color: #fbffe0; background: linear-gradient(135deg, #1e3010, #2e4818, #1e3010); border-color: #9ac848aa; box-shadow: 0 0 18px #7a9a3a44; transform: translateY(-2px); }
+
+    #credits-corner { position: fixed; bottom: 18px; right: 20px; font-size: 12px; color: #3a5020; line-height: 1.7; text-align: right; z-index: 510; pointer-events: none; }
+
+    /* ── PANELES OVERLAY ── */
+    .overlay-panel {
+      position: fixed; inset: 0; z-index: 600;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(4,10,6,0.92); backdrop-filter: blur(5px);
+      opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    }
+    .overlay-panel.visible { opacity: 1; pointer-events: all; }
+    .panel-box {
+      background: linear-gradient(160deg, #122008, #0a1407);
+      border: 1px solid #5a7a28; border-top-color: #9ac848;
+      padding: 34px 46px; min-width: 380px; max-width: 92%;
+      clip-path: polygon(14px 0%,calc(100% - 14px) 0%,100% 14px,100% calc(100% - 14px),calc(100% - 14px) 100%,14px 100%,0% calc(100% - 14px),0% 14px);
+    }
+    .panel-title { font-family: 'Cinzel', serif; font-size: 22px; color: #e8c870; text-align: center; margin-bottom: 8px; }
+    .panel-tagline { font-style: italic; font-size: 13px; color: #6a8a45; text-align: center; margin-bottom: 22px; }
+
+    /* ── ALTAR ── */
+    #altar-esp { font-family: 'Cinzel', serif; font-size: 18px; color: #e8c870; text-align: center; margin-bottom: 18px; }
+    .altar-item { display: flex; align-items: center; gap: 14px; background: #0e1c08; border: 1px solid #2e4818; padding: 11px 14px; margin-bottom: 9px; }
+    .altar-icon { font-size: 26px; width: 34px; text-align: center; }
+    .altar-info { flex: 1; }
+    .altar-nombre { font-family: 'Cinzel', serif; font-size: 14px; color: #cfe0a0; }
+    .altar-desc { font-size: 12px; color: #6a8a55; }
+    .altar-niv { font-family: 'Cinzel', serif; font-size: 11px; color: #9ac848; }
+    .altar-buy { font-family: 'Cinzel', serif; font-size: 12px; color: #e8c870; background: #1a2e0c; border: 1px solid #5a7a28; padding: 8px 14px; cursor: pointer; min-width: 96px; text-align: center; transition: all 0.2s; }
+    .altar-buy:hover:not(:disabled) { background: #2a4416; color: #fff; }
+    .altar-buy:disabled { opacity: 0.4; cursor: not-allowed; }
+    .altar-buy.max { color: #9ac848; }
+
+    .opcion-row { display: flex; align-items: center; gap: 18px; margin-bottom: 22px; }
+    .opcion-label { font-size: 16px; color: #9ab070; min-width: 120px; }
+    .opcion-slider { -webkit-appearance: none; appearance: none; width: 150px; height: 4px; background: linear-gradient(to right, #9ac848 var(--val,80%), #2a3a18 var(--val,80%)); border-radius: 2px; outline: none; cursor: pointer; }
+    .opcion-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 15px; height: 15px; border-radius: 50%; background: #e8c870; border: 2px solid #5a7a28; }
+    .opcion-val { font-family:'Cinzel',serif; font-size:12px; color:#7a9a55; min-width:30px; text-align:right; }
+    .tutorial { font-size: 13px; color: #7a9a55; line-height: 1.9; margin: 6px 0 20px; text-align: center; }
+    .tutorial b { color: #cfe0a0; }
+    .btn-secondary { font-family:'Cinzel',serif; font-size:13px; color:#7a9a55; background:transparent; border:1px solid #2e4818; padding:8px 26px; cursor:pointer; transition:all 0.2s; display:block; margin:6px auto 0; }
+    .btn-secondary:hover { color:#e8c870; border-color:#9ac848; }
+
+    /* ── PAUSA ── */
+    #menu-pausa .panel-box { min-width: 300px; }
+    .pausa-nav { display:flex; flex-direction:column; gap:11px; align-items:center; }
+    .pausa-btn { font-family:'Cinzel',serif; font-size:16px; color:#d8e8a0; background: linear-gradient(135deg, #122008, #1e3010, #122008); border:1px solid #5a7a2866; border-top-color:#9ac84844; padding:11px 44px; cursor:pointer; min-width:220px; text-align:center; transition:all 0.2s; clip-path:polygon(8px 0%,calc(100% - 8px) 0%,100% 8px,100% calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,0% calc(100% - 8px),0% 8px); }
+    .pausa-btn:hover { color:#fff; background:linear-gradient(135deg,#1e3010,#2e4818,#1e3010); border-color:#9ac848aa; transform:translateY(-1px); }
+    .pausa-btn.danger { color:#c08070; font-size:14px; }
+    .pausa-btn.danger:hover { color:#ff8866; border-color:#884422aa; }
+
+    /* ── HUD ── */
+    #hud { position: fixed; top:0; left:0; right:0; height:54px; display:none; align-items:center; padding:0 18px; gap:14px; background:linear-gradient(to bottom, rgba(4,10,6,0.9) 0%, transparent 100%); z-index:20; font-family:'Cinzel',serif; pointer-events:none; }
+    #hud.visible { display:flex; }
+    .hud-icon { font-size:16px; }
+    .hud-val { font-size:14px; color:#d8e8a0; }
+    .vida-wrap { width:120px; height:9px; background:#2a0808; border-radius:4px; overflow:hidden; }
+    #vida-fill { height:100%; width:100%; background:linear-gradient(to right,#44dd55,#88ff66); border-radius:4px; transition:width 0.12s; }
+    .xp-wrap { width:140px; height:5px; background:#1a2810; border-radius:3px; overflow:hidden; }
+    #xp-fill { height:100%; width:0%; background:linear-gradient(to right,#5aa0ff,#88ddff); transition:width 0.15s; }
+    .hud-sep { width:1px; height:24px; background:#1e3010; }
+    #hud-armas { display:flex; gap:5px; }
+    .arma-chip { font-size:12px; color:#cfe0a0; background:#142808; border:1px solid #2e4818; padding:2px 6px; border-radius:3px; }
+    .arma-chip.evo { border-color:#e8c870; color:#ffe080; }
+    #hud-tiempo { margin-left:auto; font-size:18px; color:#e8c870; letter-spacing:0.08em; }
+    #hud-esc { font-size:10px; color:#3a5020; }
+
+    #zona-label { position:fixed; top:64px; left:50%; transform:translateX(-50%); font-family:'Cinzel',serif; font-size:15px; letter-spacing:0.12em; color:#9ac848; opacity:0; transition:opacity 0.5s; z-index:20; pointer-events:none; text-shadow:0 0 12px #000; }
+    #zona-label.show { opacity:1; }
+
+    /* ── BARRA JEFE ── */
+    #boss-wrap { position:fixed; top:62px; left:50%; transform:translateX(-50%); width:min(640px,80%); z-index:21; display:none; pointer-events:none; }
+    #boss-wrap.visible { display:block; }
+    .boss-nombre { font-family:'Cinzel',serif; font-size:14px; color:#e8c870; text-align:center; margin-bottom:4px; text-shadow:0 0 10px #000; }
+    .boss-bar { height:14px; background:#1a0808; border:1px solid #884422; border-radius:4px; overflow:hidden; }
+    #boss-fill { height:100%; width:100%; background:linear-gradient(to right,#cc3333,#ff7744); transition:width 0.2s; }
+
+    /* ── SELECTOR (nivel / cofre) ── */
+    .selector { z-index: 350; }
+    .sel-title { font-family:'Cinzel',serif; font-size:24px; color:#e8c870; text-align:center; margin-bottom:4px; }
+    .sel-sub { font-style:italic; font-size:13px; color:#7a9a55; text-align:center; margin-bottom:22px; }
+    .sel-grid { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+    .sel-card { position:relative; width:170px; background:#0e1c08; border:1px solid #2e4818; padding:18px 14px; cursor:pointer; text-align:center; transition:all 0.18s; }
+    .sel-card:hover { border-color:#9ac848; background:#16280c; transform:translateY(-3px); box-shadow:0 0 18px #7a9a3a44; }
+    .sel-num { position:absolute; top:6px; left:8px; font-family:'Cinzel',serif; font-size:11px; color:#5a7a28; }
+    .sel-icon { font-size:38px; margin-bottom:8px; }
+    .sel-nombre { font-family:'Cinzel',serif; font-size:14px; color:#cfe0a0; margin-bottom:5px; }
+    .sel-etq { font-family:'Cinzel',serif; font-size:11px; color:#e8c870; margin-bottom:7px; letter-spacing:0.05em; }
+    .sel-desc { font-size:12px; color:#6a8a55; line-height:1.4; }
+
+    /* ── NOTIF ── */
+    #notif { position:fixed; bottom:22px; left:50%; transform:translateX(-50%); font-family:'Cinzel',serif; font-size:13px; color:#d8e8a0; background:rgba(6,12,8,0.93); border:1px solid #5a7a2844; padding:9px 26px; pointer-events:none; opacity:0; transition:opacity 0.3s; z-index:400; white-space:nowrap; }
+    #notif.show { opacity:1; }
+
+    /* ── GAME OVER ── */
+    #gameover { position:fixed; inset:0; z-index:700; background:rgba(0,0,0,0.9); display:none; flex-direction:column; align-items:center; justify-content:center; }
+    #gameover.visible { display:flex; }
+    .go-title { font-family:'Cinzel',serif; font-size:50px; color:#cc3333; text-shadow:0 0 40px #00000088; margin-bottom:14px; }
+    .go-stats { font-size:18px; color:#9ab070; margin-bottom:30px; text-align:center; line-height:2.1; }
+    .go-btn { font-family:'Cinzel',serif; font-size:16px; color:#d8e8a0; background:#142808; border:1px solid #5a7a28; padding:11px 38px; cursor:pointer; transition:all 0.2s; }
+    .go-btn:hover { background:#2a4416; }
+
+    /* ── LOADING ── */
+    #loading { position:fixed; inset:0; z-index:800; background:#06100a; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:13px; font-family:'Cinzel',serif; color:#9ac848; font-size:21px; }
+    #loading.hidden { display:none; }
+    .loading-sub { font-size:12px; color:#3a5020; font-style:italic; }
+  </style>
+</head>
+<body>
+  <div id="game-canvas-container"></div>
+  <div id="dano-overlay"></div>
+
+  <div id="loading">🌑 Maldecido<div class="loading-sub">Despertando a los espíritus…</div></div>
+
+  <!-- MENÚ PRINCIPAL -->
+  <div id="menu">
+    <div class="menu-logo">Maldecido</div>
+    <div class="menu-sub">El Trance del Chamán</div>
+    <nav class="menu-nav">
+      <button class="menu-btn" id="btn-comenzar">🌿&nbsp;&nbsp;Comenzar Incursión</button>
+      <button class="menu-btn" id="btn-altar">🗿&nbsp;&nbsp;Altar de los Dioses</button>
+      <button class="menu-btn" id="btn-ajustes">⚙️&nbsp;&nbsp;Ajustes</button>
+      <button class="menu-btn" id="btn-salir" style="color:#80906a;font-size:16px;">🚪&nbsp;&nbsp;Salir</button>
+    </nav>
+  </div>
+
+  <div id="credits-corner">
+    <div style="color:#5a7a28;font-size:13px;margin-bottom:2px;">Créditos</div>
+    <div>Diseño y Programación: Nombre Apellido</div>
+    <div style="margin-top:3px;color:#1e3010;">v3.0 — 2026</div>
+  </div>
+
+  <!-- ALTAR DE LOS DIOSES -->
+  <div id="panel-altar" class="overlay-panel">
+    <div class="panel-box" style="min-width:520px;">
+      <div class="panel-title">🗿 Altar de los Dioses</div>
+      <div class="panel-tagline">"Ofrenda tu Espiritualidad y los dioses te bendecirán."</div>
+      <div id="altar-esp">Espiritualidad: 0 ✦</div>
+      <div id="altar-lista"></div>
+      <button class="btn-secondary" id="btn-altar-volver">← Volver</button>
+    </div>
+  </div>
+
+  <!-- AJUSTES -->
+  <div id="panel-ajustes" class="overlay-panel">
+    <div class="panel-box">
+      <div class="panel-title">⚙ Ajustes</div>
+      <div class="opcion-row"><span class="opcion-label">Música</span>
+        <input class="opcion-slider" type="range" id="vol-musica" min="0" max="100" value="80"
+          oninput="this.style.setProperty('--val',this.value+'%');document.getElementById('val-musica').textContent=this.value">
+        <span class="opcion-val" id="val-musica">80</span></div>
+      <div class="opcion-row"><span class="opcion-label">Sonido</span>
+        <input class="opcion-slider" type="range" id="vol-sfx" min="0" max="100" value="100"
+          oninput="this.style.setProperty('--val',this.value+'%');document.getElementById('val-sfx').textContent=this.value">
+        <span class="opcion-val" id="val-sfx">100</span></div>
+      <div class="tutorial">
+        <b>Controles</b><br>
+        Moverse: <b>WASD</b> o <b>flechas</b><br>
+        Los ataques son <b>automáticos</b><br>
+        Elegir mejoras: <b>click</b> o teclas <b>1 / 2 / 3</b><br>
+        Pausa: <b>ESC</b>
+      </div>
+      <button class="btn-secondary" id="btn-ajustes-volver">← Volver</button>
+    </div>
+  </div>
+
+  <!-- PAUSA -->
+  <div id="menu-pausa" class="overlay-panel">
+    <div class="panel-box" style="min-width:300px;">
+      <div class="panel-title">⏸ Pausa</div>
+      <nav class="pausa-nav">
+        <button class="pausa-btn" id="btn-reanudar">▶&nbsp;&nbsp;Reanudar</button>
+        <button class="pausa-btn danger" id="btn-volver-menu">🚪&nbsp;&nbsp;Volver al Menú</button>
+      </nav>
+    </div>
+  </div>
+
+  <!-- HUD -->
+  <div id="hud">
+    <span class="hud-icon">❤️</span>
+    <div class="vida-wrap"><div id="vida-fill"></div></div>
+    <span class="hud-val" id="hud-vida">100</span>
+    <div class="hud-sep"></div>
+    <span class="hud-val" id="hud-nivel">Nv 1</span>
+    <div class="xp-wrap"><div id="xp-fill"></div></div>
+    <div class="hud-sep"></div>
+    <span class="hud-icon">✦</span>
+    <span class="hud-val" id="hud-esp">0</span>
+    <div class="hud-sep"></div>
+    <div id="hud-armas"></div>
+    <div id="hud-tiempo">00:00</div>
+    <div class="hud-sep"></div>
+    <div id="hud-esc">[ESC] Pausa</div>
+  </div>
+
+  <div id="zona-label"></div>
+
+  <!-- BARRA JEFE -->
+  <div id="boss-wrap">
+    <div class="boss-nombre">💀 Chamán Usurpador</div>
+    <div class="boss-bar"><div id="boss-fill"></div></div>
+  </div>
+
+  <!-- SELECTOR NIVEL -->
+  <div id="panel-nivel" class="overlay-panel selector">
+    <div class="panel-box" style="min-width:auto;">
+      <div class="sel-title">⬆ ¡Subiste de nivel!</div>
+      <div class="sel-sub"></div>
+      <div class="sel-grid" id="nivel-grid"></div>
+    </div>
+  </div>
+
+  <!-- SELECTOR COFRE -->
+  <div id="panel-cofre" class="overlay-panel selector">
+    <div class="panel-box" style="min-width:auto;">
+      <div class="sel-title">✦ Tótem de Oro</div>
+      <div class="sel-sub"></div>
+      <div class="sel-grid" id="cofre-grid"></div>
+    </div>
+  </div>
+
+  <div id="notif"></div>
+
+  <!-- GAME OVER -->
+  <div id="gameover">
+    <div class="go-title">💀 DERROTADO</div>
+    <div class="go-stats" id="go-stats"></div>
+    <button class="go-btn" onclick="location.reload()">Volver a empezar</button>
+  </div>
+
+  <script>
+    (function () {
+      const scripts = [
+        'pixi.js',
+        'clases/gameObject.js',
+        'clases/entidadConSalud.js',
+        'clases/jugador.js',
+        'clases/enemigos.js',
+        'clases/objetosConsumibles.js',
+        'clases/manifestaciones.js',
+        'clases/altar.js',
+        'clases/game.js',
+      ];
+      function loadNext(i) {
+        if (i >= scripts.length) { onAllLoaded(); return; }
+        const s = document.createElement('script');
+        s.src = scripts[i];
+        s.onload = () => loadNext(i + 1);
+        s.onerror = () => {
+          document.getElementById('loading').innerHTML =
+            `<span style="color:#ff4444">❌ Error cargando:<br>${scripts[i]}</span>`;
+        };
+        document.head.appendChild(s);
+      }
+
+      function onAllLoaded() {
+        document.getElementById('loading').classList.add('hidden');
+
+        ['vol-musica', 'vol-sfx'].forEach(id => {
+          const el = document.getElementById(id);
+          el.style.setProperty('--val', el.value + '%');
+        });
+
+        // ── ALTAR ──
+        function renderAltar() {
+          document.getElementById('altar-esp').textContent = `Espiritualidad: ${Altar.espiritualidad} ✦`;
+          const lista = document.getElementById('altar-lista');
+          lista.innerHTML = '';
+          Altar.MEJORAS.forEach(m => {
+            const niv = Altar.nivelDe(m.id);
+            const costo = Altar.costoSiguiente(m.id);
+            const item = document.createElement('div');
+            item.className = 'altar-item';
+            const btn = costo === null
+              ? `<button class="altar-buy max" disabled>MÁX</button>`
+              : `<button class="altar-buy" data-id="${m.id}" ${Altar.espiritualidad < costo ? 'disabled' : ''}>${costo} ✦</button>`;
+            item.innerHTML = `<div class="altar-icon">${m.icon}</div>
+              <div class="altar-info">
+                <div class="altar-nombre">${m.nombre}</div>
+                <div class="altar-desc">${m.desc}</div>
+                <div class="altar-niv">Nivel ${niv} / ${m.maxNivel}</div>
+              </div>${btn}`;
+            lista.appendChild(item);
+          });
+          lista.querySelectorAll('.altar-buy[data-id]').forEach(b => {
+            b.addEventListener('click', () => { if (Altar.comprar(b.dataset.id)) renderAltar(); });
+          });
+        }
+        document.getElementById('btn-altar').addEventListener('click', () => { renderAltar(); document.getElementById('panel-altar').classList.add('visible'); });
+        document.getElementById('btn-altar-volver').addEventListener('click', () => document.getElementById('panel-altar').classList.remove('visible'));
+
+        // ── AJUSTES ──
+        document.getElementById('btn-ajustes').addEventListener('click', () => document.getElementById('panel-ajustes').classList.add('visible'));
+        document.getElementById('btn-ajustes-volver').addEventListener('click', () => document.getElementById('panel-ajustes').classList.remove('visible'));
+
+        document.getElementById('btn-salir').addEventListener('click', () => window.close());
+
+        // ── COMENZAR INCURSIÓN ──
+        document.getElementById('btn-comenzar').addEventListener('click', async () => {
+          document.getElementById('menu').classList.add('hidden');
+          document.getElementById('credits-corner').style.display = 'none';
+          document.getElementById('hud').classList.add('visible');
+          await Game.start();
+        });
+
+        // ── PAUSA ──
+        document.getElementById('btn-reanudar').addEventListener('click', () => {
+          document.getElementById('menu-pausa').classList.remove('visible');
+          Game.reanudar();
+        });
+        document.getElementById('btn-volver-menu').addEventListener('click', () => {
+          document.getElementById('menu-pausa').classList.remove('visible');
+          Game.volverAlMenu();
+          document.getElementById('menu').classList.remove('hidden');
+          document.getElementById('credits-corner').style.display = '';
+        });
+
+        // ── ESC ──
+        window.addEventListener('keydown', e => {
+          if (e.key !== 'Escape') return;
+          // bloquear pausa mientras hay que elegir mejora/cofre
+          if (document.getElementById('panel-nivel').classList.contains('visible')) return;
+          if (document.getElementById('panel-cofre').classList.contains('visible')) return;
+          if (document.getElementById('panel-altar').classList.contains('visible')) { document.getElementById('panel-altar').classList.remove('visible'); return; }
+          if (document.getElementById('panel-ajustes').classList.contains('visible')) { document.getElementById('panel-ajustes').classList.remove('visible'); return; }
+
+          const gameActivo = Game._app !== null;
+          const gameoverVis = document.getElementById('gameover').classList.contains('visible');
+          if (!gameActivo || gameoverVis) return;
+
+          const pausado = document.getElementById('menu-pausa').classList.contains('visible');
+          if (pausado) { document.getElementById('menu-pausa').classList.remove('visible'); Game.reanudar(); }
+          else { Game.pausar(); document.getElementById('menu-pausa').classList.add('visible'); }
+        });
+      }
+
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => loadNext(0));
+      else loadNext(0);
+    })();
+  </script>
+</body>
+</html>
