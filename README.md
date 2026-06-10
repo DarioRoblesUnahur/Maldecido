@@ -88,5 +88,5 @@ Luego abrí `http://localhost:8080` en el navegador.
 
 ## Créditos
 
-Diseño y programación: Gem Fest — 2026  
+Diseño y programación: Dario Robles  
 Motor gráfico: [PixiJS](https://pixijs.com/)
