@@ -24,7 +24,7 @@
     #menu {
       position: fixed; inset: 0; z-index: 500;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      background: radial-gradient(ellipse at 50% 35%, #15301a 0%, #06100a 70%);
+      background: linear-gradient(rgba(4,10,6,0.45), rgba(4,10,6,0.45)), url('imagenDeFondoDeMenu.png') center center / cover no-repeat, #06100a;
       transition: opacity 0.5s;
     }
     #menu.hidden { opacity: 0; pointer-events: none; }
@@ -278,12 +278,31 @@
     (function () {
       const scripts = [
         'pixi.js',
-        'clases/gameObject.js',
-        'clases/entidadConSalud.js',
+        'clases/base/gameObject.js',
+        'clases/base/entidadConSalud.js',
         'clases/jugador.js',
-        'clases/enemigos.js',
-        'clases/objetosConsumibles.js',
-        'clases/manifestaciones.js',
+        'clases/enemigos/vistas.js',
+        'clases/enemigos/enemigo.js',
+        'clases/enemigos/guerrero.js',
+        'clases/enemigos/bestia.js',
+        'clases/enemigos/sombra.js',
+        'clases/enemigos/hechicero.js',
+        'clases/enemigos/golem.js',
+        'clases/enemigos/chamanUsurpador.js',
+        'clases/consumibles/objetoConsumible.js',
+        'clases/consumibles/orbeDeExperiencia.js',
+        'clases/consumibles/totemDeOro.js',
+        'clases/manifestaciones/manifestacion.js',
+        'clases/manifestaciones/jaguaresEspectrales.js',
+        'clases/manifestaciones/bolasDeVeneno.js',
+        'clases/manifestaciones/condorVigia.js',
+        'clases/manifestaciones/estallido.js',
+        'clases/manifestaciones/totem.js',
+        'clases/manifestaciones/totemFuego.js',
+        'clases/manifestaciones/totemTierra.js',
+        'clases/manifestaciones/totemAire.js',
+        'clases/manifestaciones/totemAgua.js',
+        'clases/manifestaciones/catalogo.js',
         'clases/altar.js',
         'clases/game.js',
       ];
@@ -343,6 +362,8 @@
 
         // ── COMENZAR INCURSIÓN ──
         document.getElementById('btn-comenzar').addEventListener('click', async () => {
+          if (Game._app) return;
+          document.activeElement?.blur();
           document.getElementById('menu').classList.add('hidden');
           document.getElementById('credits-corner').style.display = 'none';
           document.getElementById('hud').classList.add('visible');

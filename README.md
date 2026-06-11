@@ -49,21 +49,73 @@ Hecho con [PixiJS](https://pixijs.com/) y vanilla JavaScript, sin frameworks ni 
 
 ---
 
+## Jerarquía de clases
+
+```
+GameObject
+├── EntidadConSalud
+│   ├── Jugador
+│   └── Enemigo
+│       ├── Guerrero
+│       ├── Bestia
+│       ├── Sombra
+│       ├── Hechicero
+│       ├── Golem
+│       └── ChamanUsurpador  ← jefe final
+└── ObjetoConsumible
+    ├── OrbeDeExperiencia
+    └── TotemDeOro
+
+Manifestacion
+├── JaguaresEspectrales
+├── BolasDeVeneno
+├── CondorVigia
+├── EstallidoDeHuaca
+└── Totem  (pasivo)
+    ├── TotemFuego
+    ├── TotemTierra
+    ├── TotemAire
+    └── TotemAgua
+```
+
 ## Estructura del proyecto
 
 ```
-index.html                  # entrada, UI y carga de scripts
+index.html                          # entrada, UI y carga de scripts
 clases/
-  gameObject.js             # clase base con posición y sprite
-  entidadConSalud.js        # vida, daño, flash visual, regeneración
-  jugador.js                # movimiento, XP, nivel, trance
-  enemigos.js               # todos los tipos de enemigo + vistas
-  manifestaciones.js        # armas, tótems y evoluciones
-  objetosConsumibles.js     # orbes de XP y tótems de oro
-  altar.js                  # progresión permanente entre partidas
-  game.js                   # loop principal, spawns, cámara, HUD
-assets/                     # sprites e imágenes
-pixi.js                     # PixiJS v8 (local)
+  base/
+    gameObject.js                   # clase raíz con posición y sprite
+    entidadConSalud.js              # vida, daño, flash visual, regeneración
+  jugador.js                        # movimiento, XP, nivel, trance
+  enemigos/
+    vistas.js                       # builders de gráficos para cada enemigo
+    enemigo.js                      # clase base de enemigos
+    guerrero.js
+    bestia.js
+    sombra.js
+    hechicero.js
+    golem.js
+    chamanUsurpador.js
+  consumibles/
+    objetoConsumible.js             # base con lógica de imán
+    orbeDeExperiencia.js
+    totemDeOro.js
+  manifestaciones/
+    manifestacion.js                # clase base
+    jaguaresEspectrales.js
+    bolasDeVeneno.js
+    condorVigia.js
+    estallido.js                    # EstallidoDeHuaca
+    totem.js                        # Totem base pasivo
+    totemFuego.js
+    totemTierra.js
+    totemAire.js
+    totemAgua.js
+    catalogo.js                     # CATALOGO, EVOLUCIONES, metaDe()
+  altar.js                          # meta-progresión permanente (localStorage)
+  game.js                           # loop principal, spawns, cámara, HUD
+assets/                             # sprites e imágenes
+pixi.js                             # PixiJS v8 (local)
 ```
 
 ---

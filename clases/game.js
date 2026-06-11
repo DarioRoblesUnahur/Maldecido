@@ -12,19 +12,22 @@ class Game {
   static reanudar() { if (Game._app) { Game._app.ticker.start(); Game._running = true;  } }
 
   static volverAlMenu() {
-    if (Game._app) {
-      Game._app.ticker.stop();
-      Game._app.destroy(true, { children: true, texture: true });
-      Game._app = null;
-      Game._running = false;
-      document.getElementById('game-canvas-container').innerHTML = '';
-      ['hud', 'gameover', 'panel-nivel', 'panel-cofre', 'boss-wrap'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.classList.remove('visible');
-      });
-      const hud = document.getElementById('hud');
-      if (hud) hud.style.display = '';
-    }
+    if (!Game._app) return;
+    const app = Game._app;
+    Game._app = null;
+    Game._running = false;
+
+    app.ticker.stop();
+    document.getElementById('game-canvas-container').innerHTML = '';
+    ['hud', 'gameover', 'panel-nivel', 'panel-cofre', 'boss-wrap'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('visible');
+    });
+    document.getElementById('hud').style.display = '';
+    document.getElementById('zona-label').classList.remove('show');
+    document.getElementById('notif').classList.remove('show');
+
+    app.destroy({ removeView: true, children: true, texture: true });
   }
 
   static async start() {
@@ -35,9 +38,7 @@ class Game {
     Game._running = true;
 
     // ── ASSETS ────────────────────────────────────────────────
-    try { PIXI.Assets.add({ alias: 'player.png', src: 'player.png' }); } catch (e) {}
-    await PIXI.Assets.load(['player.png']);
-    const texPlayer = PIXI.Texture.from('player.png');
+    const texPlayer = await PIXI.Assets.load('player.png');
 
     // ── SUELO DE SELVA (tile procedural infinito) ─────────────
     const tileG = new PIXI.Graphics();
@@ -73,7 +74,9 @@ class Game {
     Altar.aplicarAJugador(jugador);   // mejoras permanentes
     world.addChild(jugador.sprite);
     world.addChild(capaEfectos);
-    jugador.manifestaciones.push(new BolasDeVeneno(jugador, capaEfectos)); // arma inicial
+    const armasIniciales = [JaguaresEspectrales, BolasDeVeneno, CondorVigia, EstallidoDeHuaca];
+    const ArmaInicial = armasIniciales[Math.floor(Math.random() * armasIniciales.length)];
+    jugador.manifestaciones.push(new ArmaInicial(jugador, capaEfectos));
 
     // barra de vida bajo el jugador
     const barraJugador = new PIXI.Graphics();
