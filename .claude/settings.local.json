@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(gh auth *)",
-      "mcp__Claude_Preview__preview_start"
+      "mcp__Claude_Preview__preview_start",
+      "Bash(gh --version)",
+      "Bash(git remote *)",
+      "Bash(git add *)"
     ]
   }
 }
