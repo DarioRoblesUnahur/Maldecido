@@ -38,7 +38,20 @@ class Game {
     Game._running = true;
 
     // ── ASSETS ────────────────────────────────────────────────
-    const texPlayer = await PIXI.Assets.load('player.png');
+    const [texPlayerRun, texPlayerIdle, texPlayerMuerte, texEsqueleto, texBestia, texReptil, texGolem, texJefe, texZombie] =
+      await Promise.all([
+        PIXI.Assets.load('playerRun.png'),
+        PIXI.Assets.load('playerIdle.png'),
+        PIXI.Assets.load('playerMuerte.png'),
+        PIXI.Assets.load('esqueletoWalk.png'),
+        PIXI.Assets.load('hombreBestiaRun.png'),
+        PIXI.Assets.load('reptilRun.png'),
+        PIXI.Assets.load('golemWalk.png'),
+        PIXI.Assets.load('jefeFinalWalk.png'),
+        PIXI.Assets.load('zombieRun.png'),
+      ]);
+    window._TEX = { esqueleto: texEsqueleto, bestia: texBestia, reptil: texReptil,
+                    golem: texGolem, jefe: texJefe, zombie: texZombie };
 
     // ── SUELO DE SELVA (tile procedural infinito) ─────────────
     const tileG = new PIXI.Graphics();
@@ -69,7 +82,7 @@ class Game {
     }
 
     // ── JUGADOR ───────────────────────────────────────────────
-    const jugador = new Jugador(0, 0, texPlayer);
+    const jugador = new Jugador(0, 0, texPlayerRun, texPlayerIdle, texPlayerMuerte);
     jugador.opcionesNivelUp = 2;
     Altar.aplicarAJugador(jugador);   // mejoras permanentes
     world.addChild(jugador.sprite);
@@ -165,7 +178,7 @@ class Game {
       const e = spawnEnemigo(Clase, p.x, p.y);
       e.esElite = true;
       e.vida = e.vidaMax = e.vidaMax * 3.5;
-      e.sprite.scale.set(1.1);
+      e.sprite.scale.set(e.sprite.scale.x * 1.4, e.sprite.scale.y * 1.4);
       const halo = new PIXI.Graphics();
       halo.circle(0, 0, 32).fill({ color: 0xffdd33, alpha: 0.22 });
       e.sprite.addChildAt(halo, 0);
@@ -472,7 +485,7 @@ class Game {
 
       // barra de vida bajo el jugador (vibra al recibir daño)
       barraJugador.clear();
-      const bw = 44, px = jugador.x - bw / 2, py = jugador.y + 34;
+      const bw = 44, px = jugador.x - bw / 2, py = jugador.y + 46;
       const vibX = jugador._flashT > 0 ? (Math.random() - 0.5) * 4 : 0;
       barraJugador.rect(px + vibX, py, bw, 5).fill({ color: 0x000000, alpha: 0.6 });
       barraJugador.rect(px + vibX, py, bw * (jugador.vida / jugador.vidaMax), 5).fill(0x44dd55);

@@ -5,7 +5,10 @@
       "mcp__Claude_Preview__preview_start",
       "Bash(gh --version)",
       "Bash(git remote *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(Get-ChildItem -Recurse -Directory)",
+      "Bash(Select-Object FullName)",
+      "PowerShell(cd \"D:\\\\progdejv1\\\\Gem Fest\\\\Maldecido\"; Get-ChildItem -Recurse -File | Select-Object FullName, @{Name='Size';Expression={$_.Length}} | Sort-Object FullName)"
     ]
   }
 }

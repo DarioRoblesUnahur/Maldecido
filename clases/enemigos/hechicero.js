@@ -1,7 +1,7 @@
 class Hechicero extends Enemigo {
   constructor(x, y, dif = 1) {
     super(x, y, {
-      tipo: "hechicero", vista: _Vistas.hechicero(1), color: 0x2980b9,
+      tipo: "hechicero", vista: _Vistas.hechicero(1), color: 0xffffff,
       vida: 55, dano: 0, velocidad: 0, espiritualidad: 5, xp: 10,
       estacionario: true, cdAtaque: 120, rango: 9999,
     }, dif);

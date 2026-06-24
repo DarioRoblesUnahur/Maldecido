@@ -4,12 +4,40 @@
    las Manifestaciones. Stats modificados por los tótems pasivos.
    ============================================================ */
 class Jugador extends EntidadConSalud {
-  constructor(x, y, texture) {
-    const spr = new PIXI.Sprite(texture);
+  constructor(x, y, texRun, texIdle, texMuerte) {
+    function buildFrames(tex, row, count) {
+      const out = [];
+      for (let i = 0; i < count; i++) {
+        out.push(new PIXI.Texture({
+          source: tex.source,
+          frame: new PIXI.Rectangle(i * 64, row * 64, 64, 64),
+        }));
+      }
+      return out;
+    }
+
+    // Filas del spritesheet: 0=arriba, 1=izquierda, 2=abajo, 3=derecha
+    const framesIdle   = buildFrames(texIdle, 2, 2); // idle mirando abajo, 2 frames
+    const framesMuerte = buildFrames(texMuerte, 0, 6);
+    const framesRun = {
+      up:    buildFrames(texRun, 0, 8),
+      left:  buildFrames(texRun, 1, 8),
+      down:  buildFrames(texRun, 2, 8),
+      right: buildFrames(texRun, 3, 8),
+    };
+
+    const spr = new PIXI.AnimatedSprite(framesIdle);
     spr.anchor.set(0.5);
-    spr.width = 34;
-    spr.height = 50;
+    spr.scale.set(1.30);
+    spr.animationSpeed = 0.12;
+    spr.play();
     super(x, y, spr, 100);
+
+    this._framesIdle   = framesIdle;
+    this._framesRun    = framesRun;
+    this._framesMuerte = framesMuerte;
+    this._estadoAnim   = 'idle'; // 'idle' | 'run' | 'muerte'
+    this._dirAnim      = 'down'; // última dirección de movimiento
 
     this.velocidadBase = 3.2;
 
@@ -56,9 +84,32 @@ class Jugador extends EntidadConSalud {
     this.x += dx * v * delta;
     this.y += dy * v * delta;
 
-    // mirar hacia donde se mueve (flip horizontal)
-    if (dx < 0) this.sprite.scale.x = -Math.abs(this.sprite.scale.x);
-    else if (dx > 0) this.sprite.scale.x = Math.abs(this.sprite.scale.x);
+    const moving = dx !== 0 || dy !== 0;
+    if (this._estadoAnim !== 'muerte') {
+      if (moving) {
+        // Dirección dominante: horizontal tiene prioridad sobre vertical
+        let dir;
+        if (Math.abs(dx) >= Math.abs(dy)) {
+          dir = dx < 0 ? 'left' : 'right';
+        } else {
+          dir = dy < 0 ? 'up' : 'down';
+        }
+
+        if (this._estadoAnim !== 'run' || this._dirAnim !== dir) {
+          this._estadoAnim = 'run';
+          this._dirAnim = dir;
+          this.sprite.textures = this._framesRun[dir];
+          this.sprite.animationSpeed = 0.18;
+          this.sprite.gotoAndPlay(0);
+        }
+      } else if (this._estadoAnim !== 'idle') {
+        this._estadoAnim = 'idle';
+        this.sprite.textures = this._framesIdle;
+        this.sprite.animationSpeed = 0.12;
+        this.sprite.gotoAndPlay(0);
+      }
+      this.sprite.scale.x = Math.abs(this.sprite.scale.x); // sin flip horizontal
+    }
 
     this.regenerar(delta);
   }
@@ -66,6 +117,13 @@ class Jugador extends EntidadConSalud {
   recibirDano(cantidad) {
     const muerto = super.recibirDano(cantidad);
     this.flash(0xff3333, 9);
+    if (muerto && this._estadoAnim !== 'muerte') {
+      this._estadoAnim = 'muerte';
+      this.sprite.textures = this._framesMuerte;
+      this.sprite.loop = false;
+      this.sprite.animationSpeed = 0.15;
+      this.sprite.gotoAndPlay(0);
+    }
     return muerto;
   }
 

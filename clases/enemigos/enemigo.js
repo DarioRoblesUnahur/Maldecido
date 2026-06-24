@@ -39,8 +39,9 @@ class Enemigo extends EntidadConSalud {
         this.x += ((dx / dist) + perpX) * this.velocidad * delta;
         this.y += ((dy / dist) + perpY) * this.velocidad * delta;
       }
-      if (dx < 0) this.sprite.scale.x = -Math.abs(this.sprite.scale.x);
-      else if (dx > 0) this.sprite.scale.x = Math.abs(this.sprite.scale.x);
+      // sprites orientados a la izquierda: positivo = izq, negativo = der
+      if (dx < 0) this.sprite.scale.x = Math.abs(this.sprite.scale.x);
+      else if (dx > 0) this.sprite.scale.x = -Math.abs(this.sprite.scale.x);
     }
 
     const d = this.distanciaA(jugador);
@@ -54,7 +55,7 @@ class Enemigo extends EntidadConSalud {
 
   recibirDano(cantidad) {
     const m = super.recibirDano(cantidad);
-    this.flash(0xffffff, 5);
+    this.flash(0xff9999, 5);
     return m;
   }
 

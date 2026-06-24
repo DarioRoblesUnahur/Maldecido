@@ -1,7 +1,7 @@
 class ChamanUsurpador extends Enemigo {
   constructor(x, y, dif = 1) {
     super(x, y, {
-      tipo: "chaman", vista: _Vistas.chaman(1), color: 0xc89222,
+      tipo: "chaman", vista: _Vistas.chaman(1), color: 0xffffff,
       vida: 4500, dano: 30, velocidad: 0.6, espiritualidad: 0, xp: 0,
       kbResist: 1, cdAtaque: 90, rango: 60,
     }, dif);
