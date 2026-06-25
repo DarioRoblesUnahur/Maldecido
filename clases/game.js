@@ -8,8 +8,8 @@ class Game {
   static _app = null;
   static _running = false;
 
-  static pausar()   { if (Game._app) { Game._app.ticker.stop();  Game._running = false; } }
-  static reanudar() { if (Game._app) { Game._app.ticker.start(); Game._running = true;  } }
+  static pausar() { if (Game._app) { Game._app.ticker.stop(); Game._running = false; } }
+  static reanudar() { if (Game._app) { Game._app.ticker.start(); Game._running = true; } }
 
   static volverAlMenu() {
     if (!Game._app) return;
@@ -38,9 +38,9 @@ class Game {
     Game._running = true;
 
     // ── ASSETS ────────────────────────────────────────────────
-    const [texPlayerRun, texPlayerIdle, texPlayerMuerte, texEsqueleto, texBestia, texReptil, texGolem, texJefe, texZombie] =
+    const [texPlayerRun, texPlayerIdle, texPlayerMuerte, texEsqueleto, texBestia, texReptil, texGolem, texJefe, texHechicero] =
       await Promise.all([
-        PIXI.Assets.load('playerRun.png'),
+        PIXI.Assets.load('playerWalk.png'),
         PIXI.Assets.load('playerIdle.png'),
         PIXI.Assets.load('playerMuerte.png'),
         PIXI.Assets.load('esqueletoWalk.png'),
@@ -48,10 +48,12 @@ class Game {
         PIXI.Assets.load('reptilRun.png'),
         PIXI.Assets.load('golemWalk.png'),
         PIXI.Assets.load('jefeFinalWalk.png'),
-        PIXI.Assets.load('zombieRun.png'),
+        PIXI.Assets.load('magosShoot.png'),
       ]);
-    window._TEX = { esqueleto: texEsqueleto, bestia: texBestia, reptil: texReptil,
-                    golem: texGolem, jefe: texJefe, zombie: texZombie };
+    window._TEX = {
+      esqueleto: texEsqueleto, bestia: texBestia, reptil: texReptil,
+      golem: texGolem, jefe: texJefe, hechicero: texHechicero
+    };
 
     // ── SUELO DE SELVA (tile procedural infinito) ─────────────
     const tileG = new PIXI.Graphics();
@@ -68,10 +70,10 @@ class Game {
     // ── MUNDO Y CAPAS ─────────────────────────────────────────
     const world = new PIXI.Container();
     app.stage.addChild(world);
-    const decoraciones   = new PIXI.Container();
+    const decoraciones = new PIXI.Container();
     const capaConsumibles = new PIXI.Container();
-    const capaEnemigos   = new PIXI.Container();
-    const capaEfectos    = new PIXI.Container();
+    const capaEnemigos = new PIXI.Container();
+    const capaEfectos = new PIXI.Container();
     world.addChild(decoraciones, capaConsumibles, capaEnemigos);
 
     // Vegetación de la selva (procedural, decorativa)
@@ -117,7 +119,7 @@ class Game {
     const TIEMPO_PARTIDA = 1800; // 30 min (cambiá este valor para probar más rápido)
 
     const FASES = [
-      { min: 0,  nombre: '🌴 La Selva Olvidada' },
+      { min: 0, nombre: '🌴 La Selva Olvidada' },
       { min: 10, nombre: '🏛 Las Ruinas de Piedra' },
       { min: 20, nombre: '🌙 El Templo de la Luna' },
     ];
@@ -189,7 +191,10 @@ class Game {
       const n = 8, rad = 360;
       for (let i = 0; i < n; i++) {
         const a = (i / n) * Math.PI * 2;
-        spawnEnemigo(Hechicero, jugador.x + Math.cos(a) * rad, jugador.y + Math.sin(a) * rad);
+        const anguloAlCentro = a + Math.PI;
+        const e = new Hechicero(jugador.x + Math.cos(a) * rad, jugador.y + Math.sin(a) * rad, dificultad(), anguloAlCentro);
+        enemigos.push(e);
+        capaEnemigos.addChild(e.sprite);
       }
       mostrarNotif('🔮 ¡Círculo de hechiceros!');
     }
@@ -317,8 +322,10 @@ class Game {
         }
       }
       // tesoro
-      pool.push({ icon: '❤', nombre: 'Reliquia de vida', etiqueta: 'TESORO', desc: 'Cura total + 20 de vida máx.',
-        aplicar: () => { jugador.vidaMax += 20; jugador.curar(jugador.vidaMax); } });
+      pool.push({
+        icon: '❤', nombre: 'Reliquia de vida', etiqueta: 'TESORO', desc: 'Cura total + 20 de vida máx.',
+        aplicar: () => { jugador.vidaMax += 20; jugador.curar(jugador.vidaMax); }
+      });
 
       barajar(pool);
       // priorizar evoluciones: las dejamos primero antes de barajar el resto
