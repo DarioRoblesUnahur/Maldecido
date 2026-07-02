@@ -41,6 +41,9 @@ class Jugador extends EntidadConSalud {
 
     this.velocidadBase = 3.2;
 
+    //radio para las colisiones
+    this.radio = 14;
+
     // Multiplicadores de los tótems (GDD §4.2)
     this.danoMult       = 1;   // tótem de fuego
     this.velocidadMult  = 1;   // tótem de aire

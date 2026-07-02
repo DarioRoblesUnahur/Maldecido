@@ -9,6 +9,7 @@ class Enemigo extends EntidadConSalud {
     this.knockbackResist = base.kbResist || 0;
     this.rangoAtaque     = base.rango || 26;
     this.estacionario    = !!base.estacionario;
+    this.radio = base.radio || 12;
     this.cooldownAtaque  = 0;
     this.cooldownMax     = base.cdAtaque || 55;
     this.esElite         = false;

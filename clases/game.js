@@ -402,10 +402,47 @@ class Game {
     actualizarHUDArmas();
 
     // ── LOOP ──────────────────────────────────────────────────
+    //separar enemigos
+    function separarEnemigos() {
+      for (let i = 0; i < enemigos.length; i++) {
+        const a = enemigos[i];
+        for (let j = i + 1; j < enemigos.length; j++) {
+          const b = enemigos[j];
+
+          const dx = b.x - a.x;
+          const dy = b.y - a.y;
+          const dist = Math.hypot(dx, dy);
+          const minDist = a.radio + b.radio;
+
+          if (dist >= minDist || dist === 0) continue; // no se tocan (o están exactamente en el mismo punto)
+
+          // cuánto se solapan, repartido mitad y mitad
+          const empuje = (minDist - dist) / 2;
+          const nx = dx / dist; // dirección normalizada de a hacia b
+          const ny = dy / dist;
+
+          if (!a.estacionario) { a.x -= nx * empuje; a.y -= ny * empuje; }
+          if (!b.estacionario) { b.x += nx * empuje; b.y += ny * empuje; }
+        }
+      }
+      for (const e of enemigos) {
+        const dx = e.x - jugador.x;
+        const dy = e.y - jugador.y;
+        const dist = Math.hypot(dx, dy);
+        const minDist = e.radio + jugador.radio;
+        if (dist >= minDist || dist === 0 || e.estacionario) continue;
+        const empuje = minDist - dist;
+        e.x += (dx / dist) * empuje;
+        e.y += (dy / dist) * empuje;
+      }
+    }
     app.ticker.add(ticker => {
       if (gameOver || !Game._running || panelAbierto) return;
       const delta = ticker.deltaTime;
       segundos += delta / 60;
+
+      //separar enemigos
+
 
       // fase
       let f = 0;
@@ -430,6 +467,7 @@ class Game {
 
       // enemigos
       for (const e of enemigos) e.update(delta, jugador, ctx);
+      separarEnemigos();
 
       // proyectiles enemigos
       for (let i = proyEnemigos.length - 1; i >= 0; i--) {
