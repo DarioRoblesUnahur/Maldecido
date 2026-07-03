@@ -1,7 +1,7 @@
 class BolasDeVeneno extends Manifestacion {
   static id = "veneno";
-  constructor(jugador, world) {
-    super(jugador, world);
+  constructor(jugador, world, capaSuelo) {
+    super(jugador, world, capaSuelo);
     this.id = "veneno";
     this.orbes = [];
     this.charcos = [];
@@ -50,7 +50,7 @@ class BolasDeVeneno extends Manifestacion {
     g.circle(0, 0, r).fill({ color: 0x3a8a1a, alpha: 0.4 });
     g.circle(0, 0, r * 0.6).fill({ color: 0x66dd33, alpha: 0.35 });
     g.x = x; g.y = y;
-    this.world.addChildAt(g, 0);
+    this.capaSuelo.addChild(g);
     this.charcos.push({ g, x, y, r, vida: (90 + this.nivel * 15) * (this.evolucionada ? 1.5 : 1) });
   }
   _enemigoMasCercano(enemigos, max) {

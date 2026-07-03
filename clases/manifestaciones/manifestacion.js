@@ -1,7 +1,8 @@
 class Manifestacion {
-  constructor(jugador, world) {
+  constructor(jugador, world, capaSuelo = world) {
     this.jugador = jugador;
     this.world = world;
+    this.capaSuelo = capaSuelo;
     this.nivel = 1;
     this.cooldown = 0;
     this.evolucionada = false;

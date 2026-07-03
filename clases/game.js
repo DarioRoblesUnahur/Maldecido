@@ -68,13 +68,15 @@ class Game {
     app.stage.addChild(floor);
 
     // ── MUNDO Y CAPAS ─────────────────────────────────────────
-    const world = new PIXI.Container();
-    app.stage.addChild(world);
-    const decoraciones = new PIXI.Container();
-    const capaConsumibles = new PIXI.Container();
-    const capaEnemigos = new PIXI.Container();
-    const capaEfectos = new PIXI.Container();
-    world.addChild(decoraciones, capaConsumibles, capaEnemigos);
+const world = new PIXI.Container();
+app.stage.addChild(world);
+const decoraciones = new PIXI.Container();
+const capaSuelo = new PIXI.Container();   // quemaduras, charcos, marcas en el piso
+const capaConsumibles = new PIXI.Container();
+const capaEnemigos = new PIXI.Container();
+capaEnemigos.sortableChildren = true;
+const capaEfectos = new PIXI.Container();
+world.addChild(decoraciones, capaSuelo, capaConsumibles, capaEnemigos);
 
     // Vegetación de la selva (procedural, decorativa)
     for (let i = 0; i < 220; i++) {
@@ -87,11 +89,11 @@ class Game {
     const jugador = new Jugador(0, 0, texPlayerRun, texPlayerIdle, texPlayerMuerte);
     jugador.opcionesNivelUp = 2;
     Altar.aplicarAJugador(jugador);   // mejoras permanentes
-    world.addChild(jugador.sprite);
+    capaEnemigos.addChild(jugador.sprite);
     world.addChild(capaEfectos);
     const armasIniciales = [JaguaresEspectrales, BolasDeVeneno, CondorVigia, EstallidoDeHuaca];
     const ArmaInicial = armasIniciales[Math.floor(Math.random() * armasIniciales.length)];
-    jugador.manifestaciones.push(new ArmaInicial(jugador, capaEfectos));
+    jugador.manifestaciones.push(new ArmaInicial(jugador, capaEfectos, capaSuelo));
 
     // barra de vida bajo el jugador
     const barraJugador = new PIXI.Graphics();
@@ -270,7 +272,7 @@ class Game {
         if (!c.totem && armas >= jugador.maxArmas) continue;
         pool.push({
           icon: c.icon, nombre: c.nombre, etiqueta: 'NUEVO', desc: c.desc,
-          aplicar: () => jugador.manifestaciones.push(new c.clase(jugador, capaEfectos)),
+          aplicar: () => jugador.manifestaciones.push(new c.clase(jugador, capaEfectos, capaSuelo)),
         });
       }
       barajar(pool);
@@ -468,6 +470,8 @@ class Game {
       // enemigos
       for (const e of enemigos) e.update(delta, jugador, ctx);
       separarEnemigos();
+      jugador.sprite.zIndex = jugador.y;
+      for (const e of enemigos) e.sprite.zIndex = e.y;
 
       // proyectiles enemigos
       for (let i = proyEnemigos.length - 1; i >= 0; i--) {
