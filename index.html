@@ -173,7 +173,7 @@
   <div id="credits-corner">
     <div style="color:#5a7a28;font-size:13px;margin-bottom:2px;">Créditos</div>
     <div>Diseño y Programación: Nombre Apellido</div>
-    <div style="margin-top:3px;color:#1e3010;">v3.0 — 2026</div>
+    <div style="margin-top:3px;color:#1e3010;" id="version-label"></div>
   </div>
 
   <!-- ALTAR DE LOS DIOSES -->
@@ -276,6 +276,11 @@
 
   <script>
     (function () {
+      // Versión de la release: subir en cada deploy.
+      // Alimenta el cache-busting (?v=) y la etiqueta del menú.
+      const VERSION = '3.1';
+      document.getElementById('version-label').textContent = 'v' + VERSION + ' — 2026';
+
       const scripts = [
         'pixi.js',
         'clases/base/gameObject.js',
@@ -309,7 +314,7 @@
       function loadNext(i) {
         if (i >= scripts.length) { onAllLoaded(); return; }
         const s = document.createElement('script');
-        s.src = scripts[i];
+        s.src = scripts[i] + '?v=' + VERSION;
         s.onload = () => loadNext(i + 1);
         s.onerror = () => {
           document.getElementById('loading').innerHTML =
