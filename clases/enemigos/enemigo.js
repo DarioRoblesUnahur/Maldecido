@@ -24,13 +24,7 @@ class Enemigo extends EntidadConSalud {
   }
 
   update(delta, jugador, ctx) {
-    if (this.cooldownAtaque > 0) this.cooldownAtaque -= delta;
-    if (this._danoTimer > 0) this._danoTimer -= delta;
-    if (this._danoAcum >= 1 && this._danoTimer <= 0) {
-      Enemigo.mostrarDano?.(this.x, this.y - 28, Math.round(this._danoAcum));
-      this._danoAcum = 0;
-      this._danoTimer = 20; // máx ~3 números por segundo por enemigo
-    }
+    this._actualizarTextoDano(delta);
 
     if (!this.estacionario) {
       const dx = jugador.x - this.x;
@@ -61,7 +55,14 @@ class Enemigo extends EntidadConSalud {
 
     this.regenerar(delta);
   }
-
+  _actualizarTextoDano(delta) {
+    if (this._danoTimer > 0) this._danoTimer -= delta;
+    if (this._danoAcum >= 1 && this._danoTimer <= 0) {
+      Enemigo.mostrarDano?.(this.x, this.y - 28, Math.round(this._danoAcum));
+      this._danoAcum = 0;
+      this._danoTimer = 20;
+    }
+  }
   recibirDano(cantidad) {
     const m = super.recibirDano(cantidad);
     this.flash(0xff9999, 5);

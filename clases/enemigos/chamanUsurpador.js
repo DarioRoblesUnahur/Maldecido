@@ -10,6 +10,7 @@ class ChamanUsurpador extends Enemigo {
   }
 
   update(delta, jugador, ctx) {
+    this._actualizarTextoDano(delta);
     const dx = jugador.x - this.x, dy = jugador.y - this.y;
     const dist = Math.hypot(dx, dy) || 1;
     if (dist > this.rangoAtaque - 6) {

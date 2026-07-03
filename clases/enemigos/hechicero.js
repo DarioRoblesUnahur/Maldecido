@@ -11,6 +11,7 @@ class Hechicero extends Enemigo {
   }
 
   update(delta, jugador, ctx) {
+    this._actualizarTextoDano(delta);
     if (this.cooldownAtaque > 0) this.cooldownAtaque -= delta;
     if (this.cooldownAtaque <= 0) {
       this.cooldownAtaque = this.cooldownMax;
