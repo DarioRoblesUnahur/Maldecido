@@ -24,6 +24,7 @@ class Enemigo extends EntidadConSalud {
   }
 
   update(delta, jugador, ctx) {
+    if (this.cooldownAtaque > 0) this.cooldownAtaque -= delta;
     this._actualizarTextoDano(delta);
 
     if (!this.estacionario) {
@@ -48,7 +49,8 @@ class Enemigo extends EntidadConSalud {
     }
 
     const d = this.distanciaA(jugador);
-    if (d < this.rangoAtaque && this.cooldownAtaque <= 0) {
+    const alcance = Math.max(this.rangoAtaque, this.radio + jugador.radio + 2);
+    if (d < alcance && this.cooldownAtaque <= 0) {
       this.cooldownAtaque = this.cooldownMax;
       if (jugador.recibirDano(this.dano)) ctx.gameOver();
     }
