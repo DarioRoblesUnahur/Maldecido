@@ -1,28 +1,36 @@
 class Enemigo extends EntidadConSalud {
   constructor(x, y, base, dificultad = 1) {
     super(x, y, base.vista, Math.round(base.vida * dificultad));
-    this.tipo            = base.tipo;
-    this.dano            = base.dano;
-    this.velocidad       = base.velocidad;
-    this.espiritualidad  = base.espiritualidad;
-    this.xpDrop          = base.xp;
+    this.tipo = base.tipo;
+    this.dano = base.dano;
+    this.velocidad = base.velocidad;
+    this.espiritualidad = base.espiritualidad;
+    this.xpDrop = base.xp;
     this.knockbackResist = base.kbResist || 0;
-    this.rangoAtaque     = base.rango || 26;
-    this.estacionario    = !!base.estacionario;
+    this.rangoAtaque = base.rango || 26;
+    this.estacionario = !!base.estacionario;
     this.radio = base.radio || 12;
-    this.cooldownAtaque  = 0;
-    this.cooldownMax     = base.cdAtaque || 55;
-    this.esElite         = false;
-    this.esBoss          = false;
+    this.cooldownAtaque = 0;
+    this._danoAcum = 0;   // daño recibido aún no mostrado
+    this._danoTimer = 0;  // frames hasta poder mostrar otro número
+    this.cooldownMax = base.cdAtaque || 55;
+    this.esElite = false;
+    this.esBoss = false;
 
     this.sprite.tint = base.color;
-    this._colorBase  = base.color;
+    this._colorBase = base.color;
     if (base.alpha != null) this.sprite.alpha = base.alpha;
     this._t = Math.random() * 6.28;
   }
 
   update(delta, jugador, ctx) {
     if (this.cooldownAtaque > 0) this.cooldownAtaque -= delta;
+    if (this._danoTimer > 0) this._danoTimer -= delta;
+    if (this._danoAcum >= 1 && this._danoTimer <= 0) {
+      Enemigo.mostrarDano?.(this.x, this.y - 28, Math.round(this._danoAcum));
+      this._danoAcum = 0;
+      this._danoTimer = 20; // máx ~3 números por segundo por enemigo
+    }
 
     if (!this.estacionario) {
       const dx = jugador.x - this.x;
@@ -57,6 +65,7 @@ class Enemigo extends EntidadConSalud {
   recibirDano(cantidad) {
     const m = super.recibirDano(cantidad);
     this.flash(0xff9999, 5);
+    this._danoAcum += cantidad;   // ← nueva
     return m;
   }
 

@@ -68,15 +68,15 @@ class Game {
     app.stage.addChild(floor);
 
     // ── MUNDO Y CAPAS ─────────────────────────────────────────
-const world = new PIXI.Container();
-app.stage.addChild(world);
-const decoraciones = new PIXI.Container();
-const capaSuelo = new PIXI.Container();   // quemaduras, charcos, marcas en el piso
-const capaConsumibles = new PIXI.Container();
-const capaEnemigos = new PIXI.Container();
-capaEnemigos.sortableChildren = true;
-const capaEfectos = new PIXI.Container();
-world.addChild(decoraciones, capaSuelo, capaConsumibles, capaEnemigos);
+    const world = new PIXI.Container();
+    app.stage.addChild(world);
+    const decoraciones = new PIXI.Container();
+    const capaSuelo = new PIXI.Container();   // quemaduras, charcos, marcas en el piso
+    const capaConsumibles = new PIXI.Container();
+    const capaEnemigos = new PIXI.Container();
+    capaEnemigos.sortableChildren = true;
+    const capaEfectos = new PIXI.Container();
+    world.addChild(decoraciones, capaSuelo, capaConsumibles, capaEnemigos);
 
     // Vegetación de la selva (procedural, decorativa)
     for (let i = 0; i < 220; i++) {
@@ -108,6 +108,7 @@ world.addChild(decoraciones, capaSuelo, capaConsumibles, capaEnemigos);
     const enemigos = [];
     const consumibles = [];
     const proyEnemigos = [];
+    const textosDano = [];
     let segundos = 0;
     let runEspiritualidad = 0;
     let gameOver = false, ganó = false;
@@ -403,7 +404,7 @@ world.addChild(decoraciones, capaSuelo, capaConsumibles, capaEnemigos);
     }
     actualizarHUDArmas();
 
-    // ── LOOP ──────────────────────────────────────────────────
+
     //separar enemigos
     function separarEnemigos() {
       for (let i = 0; i < enemigos.length; i++) {
@@ -438,6 +439,25 @@ world.addChild(decoraciones, capaSuelo, capaConsumibles, capaEnemigos);
         e.y += (dy / dist) * empuje;
       }
     }
+    function crearTextoDano(x, y, cantidad) {
+      const texto = new PIXI.Text({
+        text: String(cantidad),
+        style: {
+          fontFamily: 'Arial',
+          fontSize: 16,
+          fontWeight: 'bold',
+          fill: 0xffffff,
+          stroke: { color: 0x000000, width: 3 },
+        },
+      });
+      texto.anchor.set(0.5);
+      texto.x = x;
+      texto.y = y;
+      capaEfectos.addChild(texto);
+      textosDano.push({ texto, vida: 0, yInicial: y });
+    }
+    Enemigo.mostrarDano = crearTextoDano;
+    // ── LOOP ──────────────────────────────────────────────────
     app.ticker.add(ticker => {
       if (gameOver || !Game._running || panelAbierto) return;
       const delta = ticker.deltaTime;
@@ -505,7 +525,19 @@ world.addChild(decoraciones, capaSuelo, capaConsumibles, capaEnemigos);
           e.destroy(); enemigos.splice(i, 1);
         }
       }
-
+      // textos de daño flotantes
+      const DURACION_TEXTO = 45; // frames ≈ 0.75 s
+      for (let i = textosDano.length - 1; i >= 0; i--) {
+        const t = textosDano[i];
+        t.vida += delta;
+        const progreso = Math.min(1, t.vida / DURACION_TEXTO);
+        t.texto.y = t.yInicial - progreso * 40;  // sube 40 px
+        t.texto.alpha = 1.5 - progreso;          // nítido la primera mitad, se desvanece la segunda
+        if (progreso >= 1) {
+          t.texto.destroy();
+          textosDano.splice(i, 1);
+        }
+      }
       // spawns (mientras no haya jefe)
       if (!bossActivo && segundos < TIEMPO_PARTIDA) {
         spawnTimer -= delta;
