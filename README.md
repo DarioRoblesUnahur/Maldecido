@@ -142,3 +142,5 @@ Luego abrí `http://localhost:8080` en el navegador.
 
 Diseño y programación: Dario Robles  
 Motor gráfico: [PixiJS](https://pixijs.com/)
+Sprites:
+![CreditosULPC](/credits-sheet.png)
