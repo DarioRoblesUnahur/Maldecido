@@ -5,37 +5,48 @@ class CondorVigia extends Manifestacion {
     this.id = "condor";
     this.picadas = [];
   }
-  get cdDisparo() { return Math.max(35, 120 - this.nivel * 9); }
+  get cdDisparo() { const c = CONFIG.armas.condor; return Math.max(c.cdMin, c.cdBase - this.nivel * c.cdPorNivel); }
   update(delta, enemigos) {
     this.cooldown -= delta;
     if (this.cooldown <= 0 && enemigos.length) {
       this.cooldown = this.cdDisparo;
-      const cercanos = enemigos.filter(e => e.distanciaA(this.jugador) < 460);
-      if (cercanos.length) {
-        const obj = cercanos[Math.floor(Math.random() * cercanos.length)];
-        const g = _Vistas.bestia(0.8);
-        g.tint = 0x88ccff; g.rotation = Math.PI / 2;
-        g.x = obj.x; g.y = obj.y - 180;
-        this.world.addChild(g);
-        this.picadas.push({ g, obj, ox: obj.x, oy: obj.y, t: 0, total: 12, hecho: false });
-      }
+      this._lanzarPicada(enemigos);
     }
+    this._actualizarPicadas(delta, enemigos);
+  }
+
+  // Elige un enemigo cercano al azar y prepara una picada sobre él.
+  _lanzarPicada(enemigos) {
+    const c = CONFIG.armas.condor;
+    const cercanos = enemigos.filter(e => e.distanciaA(this.jugador) < c.alcance);
+    if (!cercanos.length) return;
+    const obj = cercanos[Math.floor(Math.random() * cercanos.length)];
+    const g = _Vistas.bestia(0.8);
+    g.tint = 0x88ccff; g.rotation = Math.PI / 2;
+    g.x = obj.x; g.y = obj.y - c.picada.altura;
+    this.world.addChild(g);
+    this.picadas.push({ g, obj, ox: obj.x, oy: obj.y, t: 0, total: c.picada.duracion, hecho: false });
+  }
+
+  // Baja el cóndor hacia el objetivo y aplica daño en área al tocar el suelo.
+  _actualizarPicadas(delta, enemigos) {
+    const c = CONFIG.armas.condor;
     for (let i = this.picadas.length - 1; i >= 0; i--) {
       const p = this.picadas[i];
       p.t += delta;
       const tx = (p.obj && !p.obj.muerto) ? p.obj.x : p.ox;
       const ty = (p.obj && !p.obj.muerto) ? p.obj.y : p.oy;
       const k = Math.min(1, p.t / p.total);
-      p.g.x = tx; p.g.y = ty - 180 * (1 - k);
+      p.g.x = tx; p.g.y = ty - c.picada.altura * (1 - k);
       if (!p.hecho && k >= 1) {
         p.hecho = true;
-        const dano = this._dmg(40 + this.nivel * 22) * (this.evolucionada ? 1.6 : 1);
-        const radio = this.evolucionada ? 70 : 30;
+        const dano = this._dmg(c.danoBase + this.nivel * c.danoPorNivel) * (this.evolucionada ? c.multDanoEvo : 1);
+        const radio = this.evolucionada ? c.radioEvo : c.radio;
         for (const e of enemigos) {
           if (e.distanciaXY(tx, ty) < radio) e.recibirDano(dano);
         }
       }
-      if (p.t > p.total + 8) { p.g.destroy(); this.picadas.splice(i, 1); }
+      if (p.t > p.total + c.picada.extra) { p.g.destroy(); this.picadas.splice(i, 1); }
     }
   }
   destroy() { this.picadas.forEach(p => p.g.destroy()); this.picadas = []; }

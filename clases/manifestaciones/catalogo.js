@@ -1,4 +1,5 @@
 const CATALOGO = [
+  { id: "daga",     nombre: "Daga de Obsidiana",     icon: "🔪", desc: "Golpe rápido al enemigo más cercano.", clase: DagaDeObsidiana, totem: false },
   { id: "jaguares", nombre: "Jaguares Espectrales", icon: "🐆", desc: "Felinos que orbitan y dañan al contacto.", clase: JaguaresEspectrales, totem: false },
   { id: "veneno",   nombre: "Bolas de Veneno",      icon: "🟢", desc: "Orbes que estallan en charcos venenosos.", clase: BolasDeVeneno, totem: false },
   { id: "condor",   nombre: "Cóndor Vigía",          icon: "🦅", desc: "Picada automática a un enemigo cercano.", clase: CondorVigia, totem: false },
@@ -7,9 +8,11 @@ const CATALOGO = [
   { id: "tierra",   nombre: "Tótem de Tierra",       icon: "🪨", desc: "+10% de defensa por nivel.", clase: TotemTierra, totem: true },
   { id: "aire",     nombre: "Tótem de Aire",         icon: "🌪", desc: "+10% de velocidad por nivel.", clase: TotemAire, totem: true },
   { id: "agua",     nombre: "Tótem de Agua",         icon: "💧", desc: "+ regeneración de vida por nivel.", clase: TotemAgua, totem: true },
+  { id: "sacrificio", nombre: "Tótem de Sacrificio", icon: "🩸", desc: "Cura 20% del daño infligido (+5% por nivel).", clase: TotemSacrificio, totem: true },
 ];
 
 const EVOLUCIONES = {
+  daga:     { totem: "sacrificio", nombre: "Macuahuitl",          icon: "🗡", desc: "Corte en semicírculo que cura el 50% del daño causado." },
   jaguares: { totem: "fuego",  nombre: "Jaguares Infernales", icon: "🔥", desc: "Aro de fuego que quema y empuja." },
   veneno:   { totem: "tierra", nombre: "Avalancha de Veneno", icon: "☣", desc: "Charcos enormes y persistentes." },
   condor:   { totem: "aire",   nombre: "Espíritu Aéreo",      icon: "💨", desc: "Picadas más amplias y potentes." },

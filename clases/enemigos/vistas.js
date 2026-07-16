@@ -20,9 +20,9 @@ function _animSpr(tex, fila, numFrames, escala, speed) {
 }
 
 const _Vistas = {
-  guerrero()  { return _animSpr(window._TEX.esqueleto, 1, 8, 1.30, 0.15); },
-  bestia()    { return _animSpr(window._TEX.bestia,    1, 8, 1.30, 0.22); },
-  sombra()    { return _animSpr(window._TEX.reptil,    1, 8, 1.30, 0.20); },
+  esqueleto()    { return _animSpr(window._TEX.esqueleto, 1, 8, 1.30, 0.15); },
+  bestia()       { return _animSpr(window._TEX.bestia,    1, 8, 1.30, 0.22); },
+  hombreReptil() { return _animSpr(window._TEX.reptil,    1, 8, 1.30, 0.20); },
   hechicero(fila = 0) { return _animSpr(window._TEX.hechicero,    fila, 13, 1.30, 0.08); },
   golem()     { return _animSpr(window._TEX.golem,     1, 8, 1.80, 0.10); },
   chaman()    { return _animSpr(window._TEX.jefe,      1, 8, 2.60, 0.12); },

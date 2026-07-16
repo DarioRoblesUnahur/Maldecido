@@ -1,13 +1,15 @@
 class Hechicero extends Enemigo {
 
   constructor(x, y, dif = 1, anguloAlCentro = 0) {
+    const cfg = CONFIG.enemigos.hechicero;
     const fila = Hechicero._filaDeAngulo(anguloAlCentro);
     super(x, y, {
       tipo: "hechicero", vista: _Vistas.hechicero(fila), color: 0xffffff,
-      vida: 55, dano: 0, velocidad: 0, espiritualidad: 5, xp: 10,
-      estacionario: true, cdAtaque: 120, rango: 9999,
+      estacionario: true,
+      ...cfg,
     }, dif);
-    this.cooldownAtaque = 60 + Math.random() * 60;
+    // arranca desfasado para que no disparen todos juntos
+    this.cooldownAtaque = cfg.esperaInicial + Math.random() * cfg.esperaAzar;
   }
 
   update(delta, jugador, ctx) {
@@ -15,7 +17,7 @@ class Hechicero extends Enemigo {
     if (this.cooldownAtaque > 0) this.cooldownAtaque -= delta;
     if (this.cooldownAtaque <= 0) {
       this.cooldownAtaque = this.cooldownMax;
-      ctx.enemigoDispara(this.x, this.y, jugador.x, jugador.y, 8);
+      ctx.enemigoDispara(this.x, this.y, jugador.x, jugador.y, CONFIG.enemigos.hechicero.danoProyectil);
     }
     this.regenerar(delta);
   }

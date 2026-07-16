@@ -31,7 +31,7 @@ class Jugador extends EntidadConSalud {
     spr.scale.set(1.30);
     spr.animationSpeed = 0.12;
     spr.play();
-    super(x, y, spr, 100);
+    super(x, y, spr, CONFIG.jugador.vidaMax);
 
     this._framesIdle   = framesIdle;
     this._framesRun    = framesRun;
@@ -39,31 +39,32 @@ class Jugador extends EntidadConSalud {
     this._estadoAnim   = 'idle'; // 'idle' | 'run' | 'muerte'
     this._dirAnim      = 'down'; // última dirección de movimiento
 
-    this.velocidadBase = 3.2;
+    this.velocidadBase = CONFIG.jugador.velocidad;
 
     //radio para las colisiones
-    this.radio = 14;
+    this.radio = CONFIG.jugador.radio;
 
     // Multiplicadores de los tótems (GDD §4.2)
     this.danoMult       = 1;   // tótem de fuego
     this.velocidadMult  = 1;   // tótem de aire
+    this.roboVida       = 0;   // tótem de sacrificio: fracción del daño que cura
     // (defensa y regen viven en EntidadConSalud: reduccionDano / regenPorSeg)
 
     // Progresión en partida
     this.nivel = 1;
     this.xp = 0;
-    this.xpSiguiente = 5;
+    this.xpSiguiente = CONFIG.jugador.xp.inicial;
 
     // Multitarea / Trance (GDD §3.2) — nivel narrativo según nivel de jugador
     this.trance = 0; // 0 fragmentada, 1 cuerpo astral, 2 trance divino
 
     // Inventario de manifestaciones (armas/habilidades) y tótems
     this.manifestaciones = [];   // instancias de Manifestacion
-    this.maxArmas        = 4;    // ranuras de daño base (ampliable por altar)
-    this.maxTotems       = 4;
+    this.maxArmas        = CONFIG.jugador.maxArmas;  // ranuras de daño base (ampliable por altar)
+    this.maxTotems       = CONFIG.jugador.maxTotems;
 
     // Recolección
-    this.radioRecoleccion = 70;  // ampliado por "Bendición de la Tierra"
+    this.radioRecoleccion = CONFIG.jugador.radioRecoleccion; // ampliado por "Bendición de la Tierra"
 
     this.keys = {};
     this._onDown = (e) => { this.keys[e.key.toLowerCase()] = true; };
@@ -75,46 +76,59 @@ class Jugador extends EntidadConSalud {
   }
 
   update(delta) {
+    const { dx, dy } = this._leerInput();
+    this._mover(dx, dy, delta);
+    if (this._estadoAnim !== 'muerte') this._actualizarAnimacion(dx, dy);
+    this.regenerar(delta);
+  }
+
+  // Lee el teclado y devuelve la dirección deseada, normalizada en diagonal.
+  _leerInput() {
     let dx = 0, dy = 0;
     if (this.keys["w"] || this.keys["arrowup"])    dy -= 1;
     if (this.keys["s"] || this.keys["arrowdown"])  dy += 1;
     if (this.keys["a"] || this.keys["arrowleft"])  dx -= 1;
     if (this.keys["d"] || this.keys["arrowright"]) dx += 1;
-
     if (dx !== 0 && dy !== 0) { dx *= 0.707; dy *= 0.707; }
+    return { dx, dy };
+  }
 
+  _mover(dx, dy, delta) {
     const v = this.velocidadBase * this.velocidadMult;
     this.x += dx * v * delta;
     this.y += dy * v * delta;
+  }
 
-    const moving = dx !== 0 || dy !== 0;
-    if (this._estadoAnim !== 'muerte') {
-      if (moving) {
-        // Dirección dominante: horizontal tiene prioridad sobre vertical
-        let dir;
-        if (Math.abs(dx) >= Math.abs(dy)) {
-          dir = dx < 0 ? 'left' : 'right';
-        } else {
-          dir = dy < 0 ? 'up' : 'down';
-        }
-
-        if (this._estadoAnim !== 'run' || this._dirAnim !== dir) {
-          this._estadoAnim = 'run';
-          this._dirAnim = dir;
-          this.sprite.textures = this._framesRun[dir];
-          this.sprite.animationSpeed = 0.18;
-          this.sprite.gotoAndPlay(0);
-        }
-      } else if (this._estadoAnim !== 'idle') {
-        this._estadoAnim = 'idle';
-        this.sprite.textures = this._framesIdle;
-        this.sprite.animationSpeed = 0.12;
-        this.sprite.gotoAndPlay(0);
-      }
-      this.sprite.scale.x = Math.abs(this.sprite.scale.x); // sin flip horizontal
+  _actualizarAnimacion(dx, dy) {
+    const moviendose = dx !== 0 || dy !== 0;
+    if (moviendose) {
+      this._reproducirCorrida(this._direccionDominante(dx, dy));
+    } else if (this._estadoAnim !== 'idle') {
+      this._reproducirIdle();
     }
+    this.sprite.scale.x = Math.abs(this.sprite.scale.x); // sin flip horizontal
+  }
 
-    this.regenerar(delta);
+  // Horizontal tiene prioridad sobre vertical.
+  _direccionDominante(dx, dy) {
+    if (Math.abs(dx) >= Math.abs(dy)) return dx < 0 ? 'left' : 'right';
+    return dy < 0 ? 'up' : 'down';
+  }
+
+  _reproducirCorrida(dir) {
+    if (this._estadoAnim === 'run' && this._dirAnim === dir) return;
+    this._estadoAnim = 'run';
+    this._dirAnim = dir;
+    this.sprite.textures = this._framesRun[dir];
+    this.sprite.animationSpeed = 0.18;
+    this.sprite.gotoAndPlay(0);
+  }
+
+  _reproducirIdle() {
+    this._estadoAnim = 'idle';
+    this.sprite.textures = this._framesIdle;
+    this.sprite.animationSpeed = 0.12;
+    this.sprite.gotoAndPlay(0);
   }
 
   recibirDano(cantidad) {
@@ -136,8 +150,8 @@ class Jugador extends EntidadConSalud {
     while (this.xp >= this.xpSiguiente) {
       this.xp -= this.xpSiguiente;
       this.nivel++;
-      // curva de XP
-      this.xpSiguiente = Math.round(5 + this.nivel * 3 + this.nivel * this.nivel * 0.4);
+      const c = CONFIG.jugador.xp; // curva de XP
+      this.xpSiguiente = Math.round(c.a + this.nivel * c.b + this.nivel * this.nivel * c.c);
       this._actualizarTrance();
       subio = true;
     }
@@ -145,8 +159,9 @@ class Jugador extends EntidadConSalud {
   }
 
   _actualizarTrance() {
-    if (this.nivel >= 13) this.trance = 2;
-    else if (this.nivel >= 6) this.trance = 1;
+    const t = CONFIG.jugador.trance;
+    if (this.nivel >= t.divino) this.trance = 2;
+    else if (this.nivel >= t.cuerpoAstral) this.trance = 1;
     else this.trance = 0;
   }
 

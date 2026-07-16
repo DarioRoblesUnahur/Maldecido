@@ -26,36 +26,44 @@ class Enemigo extends EntidadConSalud {
   update(delta, jugador, ctx) {
     if (this.cooldownAtaque > 0) this.cooldownAtaque -= delta;
     this._actualizarTextoDano(delta);
+    if (!this.estacionario) this._perseguir(jugador, delta);
+    this._intentarAtacar(jugador, ctx);
+    this.regenerar(delta);
+  }
 
-    if (!this.estacionario) {
-      const dx = jugador.x - this.x;
-      const dy = jugador.y - this.y;
-      const dist = Math.hypot(dx, dy) || 1;
+  _perseguir(jugador, delta) {
+    const dx = jugador.x - this.x;
+    const dy = jugador.y - this.y;
+    const dist = Math.hypot(dx, dy) || 1;
 
-      let perpX = 0, perpY = 0;
-      if (this.tipo === "sombra") {
-        this._t += 0.12 * delta;
-        perpX = (-dy / dist) * Math.sin(this._t) * 0.6;
-        perpY = (dx / dist) * Math.sin(this._t) * 0.6;
-      }
-
-      if (dist > this.rangoAtaque - 4) {
-        this.x += ((dx / dist) + perpX) * this.velocidad * delta;
-        this.y += ((dy / dist) + perpY) * this.velocidad * delta;
-      }
-      // sprites orientados a la izquierda: positivo = izq, negativo = der
-      if (dx < 0) this.sprite.scale.x = Math.abs(this.sprite.scale.x);
-      else if (dx > 0) this.sprite.scale.x = -Math.abs(this.sprite.scale.x);
+    // los hombres reptil avanzan zigzagueando (componente perpendicular oscilante)
+    let perpX = 0, perpY = 0;
+    if (this.tipo === "hombreReptil") {
+      this._t += 0.12 * delta;
+      perpX = (-dy / dist) * Math.sin(this._t) * 0.6;
+      perpY = (dx / dist) * Math.sin(this._t) * 0.6;
     }
 
+    if (dist > this.rangoAtaque - 4) {
+      this.x += ((dx / dist) + perpX) * this.velocidad * delta;
+      this.y += ((dy / dist) + perpY) * this.velocidad * delta;
+    }
+    this._orientarSprite(dx);
+  }
+
+  // sprites orientados a la izquierda: positivo = izq, negativo = der
+  _orientarSprite(dx) {
+    if (dx < 0) this.sprite.scale.x = Math.abs(this.sprite.scale.x);
+    else if (dx > 0) this.sprite.scale.x = -Math.abs(this.sprite.scale.x);
+  }
+
+  _intentarAtacar(jugador, ctx) {
     const d = this.distanciaA(jugador);
     const alcance = Math.max(this.rangoAtaque, this.radio + jugador.radio + 2);
     if (d < alcance && this.cooldownAtaque <= 0) {
       this.cooldownAtaque = this.cooldownMax;
       if (jugador.recibirDano(this.dano)) ctx.gameOver();
     }
-
-    this.regenerar(delta);
   }
   _actualizarTextoDano(delta) {
     if (this._danoTimer > 0) this._danoTimer -= delta;
@@ -68,7 +76,8 @@ class Enemigo extends EntidadConSalud {
   recibirDano(cantidad) {
     const m = super.recibirDano(cantidad);
     this.flash(0xff9999, 5);
-    this._danoAcum += cantidad;   // ← nueva
+    this._danoAcum += cantidad;
+    Enemigo.alRecibirDano?.(cantidad); // robo de vida global (Tótem de Sacrificio)
     return m;
   }
 

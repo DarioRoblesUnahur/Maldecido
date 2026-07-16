@@ -8,7 +8,13 @@
       "Bash(git add *)",
       "Bash(Get-ChildItem -Recurse -Directory)",
       "Bash(Select-Object FullName)",
-      "PowerShell(cd \"D:\\\\progdejv1\\\\Gem Fest\\\\Maldecido\"; Get-ChildItem -Recurse -File | Select-Object FullName, @{Name='Size';Expression={$_.Length}} | Sort-Object FullName)"
+      "PowerShell(cd \"D:\\\\progdejv1\\\\Gem Fest\\\\Maldecido\"; Get-ChildItem -Recurse -File | Select-Object FullName, @{Name='Size';Expression={$_.Length}} | Sort-Object FullName)",
+      "Bash(xargs wc -l)",
+      "Bash(python -m http.server 8765 --bind 127.0.0.1)",
+      "Bash(taskkill //FI \"IMAGENAME eq python.exe\" //F)",
+      "Bash(git mv *)",
+      "Bash(python -m http.server 8768 --bind 127.0.0.1)",
+      "Bash(python -m http.server 8769 --bind 127.0.0.1)"
     ]
   }
 }

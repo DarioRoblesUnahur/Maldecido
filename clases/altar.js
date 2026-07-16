@@ -6,18 +6,8 @@
 class Altar {
   static KEY = "maldecido_altar_v1";
 
-  static MEJORAS = [
-    { id: "bendicion",  nombre: "Bendición de la Tierra", icon: "🌿",
-      desc: "+20% de radio de recolección por nivel.", maxNivel: 6, costoBase: 30, costoInc: 25 },
-    { id: "atencion",   nombre: "Atención de los Espíritus", icon: "👁",
-      desc: "Ofrece 3 opciones al subir de nivel (en vez de 2).", maxNivel: 1, costoBase: 250, costoInc: 0 },
-    { id: "pielCaiman", nombre: "Piel de Caimán", icon: "🐊",
-      desc: "+25 de vida máxima por nivel.", maxNivel: 6, costoBase: 40, costoInc: 30 },
-    { id: "canalizacion", nombre: "Canalización Veloz", icon: "⚡",
-      desc: "+8% de daño base por nivel.", maxNivel: 6, costoBase: 50, costoInc: 35 },
-    { id: "boveda",     nombre: "Bóveda Sagrada", icon: "📜",
-      desc: "+1 ranura de arma y +1 de tótem por nivel.", maxNivel: 2, costoBase: 200, costoInc: 200 },
-  ];
+  // Los números (costos, topes y efectos) viven en CONFIG.altar
+  static MEJORAS = CONFIG.altar.mejoras;
 
   static _datos() {
     try {
@@ -63,6 +53,7 @@ class Altar {
 
   // Aplica las mejoras permanentes al jugador al iniciar la partida
   static aplicarAJugador(jugador) {
+    const cfg = CONFIG.altar;
     const bendicion = Altar.nivelDe("bendicion");
     const atencion  = Altar.nivelDe("atencion");
     const piel      = Altar.nivelDe("pielCaiman");
@@ -70,22 +61,24 @@ class Altar {
     const boveda    = Altar.nivelDe("boveda");
 
     // bases para los tótems
-    jugador._danoBaseMult = 1 + 0.08 * canal;
+    jugador._danoBaseMult = 1 + cfg.canalizacionDanoPorNivel * canal;
     jugador._velBaseMult  = 1;
     jugador._defBase      = 0;
     jugador._regenBase    = 0;
+    jugador._roboBase     = 0;
 
     jugador.danoMult      = jugador._danoBaseMult;
     jugador.velocidadMult = 1;
     jugador.reduccionDano = 0;
     jugador.regenPorSeg   = 0;
+    jugador.roboVida      = 0;
 
-    jugador.radioRecoleccion = 70 * (1 + 0.2 * bendicion);
-    jugador.vidaMax = 100 + 25 * piel;
+    jugador.radioRecoleccion = CONFIG.jugador.radioRecoleccion * (1 + cfg.bendicionRadioPorNivel * bendicion);
+    jugador.vidaMax = CONFIG.jugador.vidaMax + cfg.pielVidaPorNivel * piel;
     jugador.vida    = jugador.vidaMax;
 
-    jugador.maxArmas  = 2 + boveda;
-    jugador.maxTotems = 2 + boveda;
-    jugador.opcionesNivelUp = atencion >= 1 ? 3 : 2;
+    jugador.maxArmas  = cfg.ranurasBase + boveda;
+    jugador.maxTotems = cfg.ranurasBase + boveda;
+    jugador.opcionesNivelUp = atencion >= 1 ? cfg.opcionesConAtencion : CONFIG.jugador.opcionesNivelUp;
   }
 }

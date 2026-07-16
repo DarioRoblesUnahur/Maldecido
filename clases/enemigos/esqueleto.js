@@ -1,8 +1,8 @@
-class Guerrero extends Enemigo {
+class Esqueleto extends Enemigo {
   constructor(x, y, dif = 1) {
     super(x, y, {
-      tipo: "guerrero", vista: _Vistas.guerrero(1), color: 0xffffff,
-      vida: 18, dano: 6, velocidad: 0.85, espiritualidad: 1, xp: 1, cdAtaque: 55,
+      tipo: "esqueleto", vista: _Vistas.esqueleto(1), color: 0xffffff,
+      ...CONFIG.enemigos.esqueleto,
     }, dif);
   }
 }

@@ -24,7 +24,7 @@
     #menu {
       position: fixed; inset: 0; z-index: 500;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      background: linear-gradient(rgba(4,10,6,0.45), rgba(4,10,6,0.45)), url('imagenDeFondoDeMenu.png') center center / cover no-repeat, #06100a;
+      background: linear-gradient(rgba(4,10,6,0.45), rgba(4,10,6,0.45)), url('assets/imagenDeFondoDeMenu.png') center center / cover no-repeat, #06100a;
       transition: opacity 0.5s;
     }
     #menu.hidden { opacity: 0; pointer-events: none; }
@@ -278,19 +278,20 @@
     (function () {
       // Versión de la release: subir en cada deploy.
       // Alimenta el cache-busting (?v=) y la etiqueta del menú.
-      const VERSION = '3.1';
+      const VERSION = '3.3';
       document.getElementById('version-label').textContent = 'v' + VERSION + ' — 2026';
 
       const scripts = [
         'pixi.js',
+        'clases/config.js',
         'clases/base/gameObject.js',
         'clases/base/entidadConSalud.js',
         'clases/jugador.js',
         'clases/enemigos/vistas.js',
         'clases/enemigos/enemigo.js',
-        'clases/enemigos/guerrero.js',
+        'clases/enemigos/esqueleto.js',
         'clases/enemigos/bestia.js',
-        'clases/enemigos/sombra.js',
+        'clases/enemigos/hombreReptil.js',
         'clases/enemigos/hechicero.js',
         'clases/enemigos/golem.js',
         'clases/enemigos/chamanUsurpador.js',
@@ -298,6 +299,7 @@
         'clases/consumibles/orbeDeExperiencia.js',
         'clases/consumibles/totemDeOro.js',
         'clases/manifestaciones/manifestacion.js',
+        'clases/manifestaciones/dagaDeObsidiana.js',
         'clases/manifestaciones/jaguaresEspectrales.js',
         'clases/manifestaciones/bolasDeVeneno.js',
         'clases/manifestaciones/condorVigia.js',
@@ -307,6 +309,7 @@
         'clases/manifestaciones/totemTierra.js',
         'clases/manifestaciones/totemAire.js',
         'clases/manifestaciones/totemAgua.js',
+        'clases/manifestaciones/totemSacrificio.js',
         'clases/manifestaciones/catalogo.js',
         'clases/altar.js',
         'clases/game.js',

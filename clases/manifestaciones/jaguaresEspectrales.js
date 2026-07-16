@@ -7,8 +7,8 @@ class JaguaresEspectrales extends Manifestacion {
     this.felinos = [];
     this._reconstruir();
   }
-  get cantidad() { return Math.min(8, 1 + this.nivel); }
-  get radio() { return this.evolucionada ? 110 : 78; }
+  get cantidad() { return Math.min(CONFIG.armas.jaguares.maxFelinos, 1 + this.nivel); }
+  get radio() { const c = CONFIG.armas.jaguares; return this.evolucionada ? c.radioEvo : c.radio; }
   _reconstruir() {
     this.felinos.forEach(f => f.destroy());
     this.felinos = [];
@@ -28,10 +28,11 @@ class JaguaresEspectrales extends Manifestacion {
   subirNivel() { super.subirNivel(); this._reconstruir(); }
   evolucionar() { super.evolucionar(); this._reconstruir(); }
   update(delta, enemigos) {
-    this.angulo += (0.04 + this.nivel * 0.004) * delta;
-    const dpsPorFelino = (10 + this.nivel * 4);
+    const c = CONFIG.armas.jaguares;
+    this.angulo += (c.giroBase + this.nivel * c.giroPorNivel) * delta;
+    const dpsPorFelino = (c.dpsBase + this.nivel * c.dpsPorNivel);
     const danoFrame = this._dmg(dpsPorFelino) / 60 * delta;
-    const golpeRadio = this.evolucionada ? 30 : 20;
+    const golpeRadio = this.evolucionada ? c.golpeRadioEvo : c.golpeRadio;
     for (let i = 0; i < this.felinos.length; i++) {
       const a = this.angulo + (i / this.felinos.length) * Math.PI * 2;
       const fx = this.jugador.x + Math.cos(a) * this.radio;
@@ -39,9 +40,9 @@ class JaguaresEspectrales extends Manifestacion {
       const f = this.felinos[i];
       f.x = fx; f.y = fy;
       for (const e of enemigos) {
-        if (e.distanciaXY(fx, fy) < golpeRadio + 12) {
+        if (e.distanciaXY(fx, fy) < golpeRadio + c.golpeMargen) {
           e.recibirDano(danoFrame);
-          if (this.evolucionada) e.empujar(fx, fy, 1.5 * delta);
+          if (this.evolucionada) e.empujar(fx, fy, c.empujeEvo * delta);
         }
       }
     }
