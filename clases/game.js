@@ -285,9 +285,13 @@ class Game {
   }
 
   _spawnHorda() {
-    for (let i = 0; i < CONFIG.spawns.horda.cantidad; i++) {
-      const p = this._puntoBorde();
-      this._spawnEnemigo(Bestia, p.x, p.y);
+    const centro = this._puntoBorde();
+    const n = CONFIG.spawns.horda.cantidad;
+    const radio = CONFIG.spawns.horda.radio || 60;
+    for (let i = 0; i < n; i++) {
+      const ang = (i / n) * Math.PI * 2;
+      const r = radio * Math.sqrt(Math.random());
+      this._spawnEnemigo(Bestia, centro.x + Math.cos(ang) * r, centro.y + Math.sin(ang) * r);
     }
     this._mostrarNotif('🐺 ¡Horda de bestias!');
   }
@@ -697,9 +701,19 @@ class Game {
   }
 
   _soltarBotin(e) {
-    const orbe = new OrbeDeExperiencia(e.x, e.y, e.xpDrop);
-    this.consumibles.push(orbe);
-    this.capaConsumibles.addChild(orbe.sprite);
+    this._soltarOrbeDeExperiencia(e);
+    this._soltarTotemDeOro(e);
+  }
+
+  _soltarOrbeDeExperiencia(e) {
+    if (Math.random() < 0.5) {
+      const orbe = new OrbeDeExperiencia(e.x, e.y, e.xpDrop);
+      this.consumibles.push(orbe);
+      this.capaConsumibles.addChild(orbe.sprite);
+    }
+  }
+
+  _soltarTotemDeOro(e) {
     if (e.esElite) {
       const totem = new TotemDeOro(e.x, e.y);
       this.consumibles.push(totem);

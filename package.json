@@ -1,0 +1,10 @@
+{
+  "name": "maldecido",
+  "private": true,
+  "scripts": {
+    "dev": "vite"
+  },
+  "devDependencies": {
+    "vite": "^6"
+  }
+}

@@ -4,8 +4,8 @@
     {
       "name": "maldecido",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["serve", "-l", "8080", "."],
-      "port": 8080
+      "runtimeArgs": ["vite"],
+      "port": 5173
     }
   ]
 }

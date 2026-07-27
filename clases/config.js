@@ -72,13 +72,13 @@ const CONFIG = {
     normal: { timerInicial: 30, cdMin: 7, cdBase: 42, cdReduccionPorMinuto: 1.4 },
 
     // Élite: enemigo reforzado que suelta un Tótem de Oro.
-    elite: { cadaSeg: 180, desdeSeg: 60, multVida: 3.5, escalaSprite: 1.4 },
+    elite: { cadaSeg: 120, desdeSeg: 60, multVida: 3.5, escalaSprite: 1.4 },
 
     // Círculo de hechiceros alrededor del jugador.
     hechiceros: { cadaSeg: 120, desdeSeg: 12, cantidad: 8, radio: 360 },
 
     // Horda de bestias.
-    horda: { cadaSeg: 60, desdeSeg: 30, cantidad: 20 },
+    horda: { cadaSeg: 5, desdeSeg: 5, cantidad: 30, radio: 150 },
 
     // Jefe final: aparece a esta distancia por encima del jugador.
     boss: { distanciaY: 460 },
