@@ -57,7 +57,7 @@ class DagaDeObsidiana extends Manifestacion {
     // GAMELOOP
     //////////
 
-    update(delta, enemigos) {
+    update(delta, enemigos, grilla) {
         this.cooldown -= delta;
         if (this.cooldown <= 0) {
             if (this.evolucionada) {
@@ -65,7 +65,7 @@ class DagaDeObsidiana extends Manifestacion {
                 this._golpearEnSemicirculo(enemigos);
             } else {
                 this.cooldown = this.cdGolpe;
-                this._golpearAlMasCercano(enemigos);
+                this._golpearAlMasCercano(enemigos, grilla);
             }
         }
         this._actualizarEfectos(delta);
@@ -75,12 +75,14 @@ class DagaDeObsidiana extends Manifestacion {
     // DAGA — golpe al enemigo más cercano
     //////////
 
-    _golpearAlMasCercano(enemigos) {
-        const objetivo = this._enemigoMasCercano(enemigos, this.alcanceGolpe);
+    _golpearAlMasCercano(enemigos, grilla) {
+        const objetivo = grilla.masCercano(this.jugador.x,
+            this.jugador.y, this.alcanceGolpe);
         if (!objetivo) return;
         // el golpe alcanza al objetivo y a lo que esté muy pegado a él
         for (const e of enemigos) {
-            if (e.distanciaA(objetivo) <= this.radioGolpe) e.recibirDano(this.danoGolpe);
+            if (e.distanciaA(objetivo) <= this.radioGolpe)
+                e.recibirDano(this.danoGolpe);
         }
         this._efectoGolpe(objetivo);
     }
@@ -131,18 +133,6 @@ class DagaDeObsidiana extends Manifestacion {
     // BÚSQUEDA
     //////////
 
-    _enemigoMasCercano(enemigos, max) {
-        let mejor = null;
-        let dist = max;
-        for (const e of enemigos) {
-            const d = e.distanciaA(this.jugador);
-            if (d < dist) {
-                dist = d;
-                mejor = e;
-            }
-        }
-        return mejor;
-    }
 
     //////////
     // EFECTOS VISUALES (transitorios)

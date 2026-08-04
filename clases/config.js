@@ -16,7 +16,7 @@ const CONFIG = {
   //////////////////////////////////////////////////
   partida: {
     duracionMin: 30,    // minutos hasta que aparece el jefe final
-    maxEnemigos: 230,   // tope de enemigos vivos a la vez (performance)
+    maxEnemigos: 500,   // tope de enemigos vivos a la vez (performance)
 
     // La dificultad escala la VIDA de los enemigos al aparecer:
     //   dificultad = 1 + minutos * incrementoPorMinuto
@@ -69,7 +69,7 @@ const CONFIG = {
   spawns: {
     // Enemigos comunes: el cooldown baja a medida que pasa el tiempo.
     //   cd = max(cdMin, cdBase - minutos * cdReduccionPorMinuto)
-    normal: { timerInicial: 30, cdMin: 7, cdBase: 42, cdReduccionPorMinuto: 1.4 },
+    normal: { timerInicial:2, cdMin: 7, cdBase: 2, cdReduccionPorMinuto: 1.4 },
 
     // Élite: enemigo reforzado que suelta un Tótem de Oro.
     elite: { cadaSeg: 120, desdeSeg: 60, multVida: 3.5, escalaSprite: 1.4 },
@@ -108,7 +108,7 @@ const CONFIG = {
   //   kbResist: 0 = se empuja fácil, 1 = inmune al empuje.
   //////////////////////////////////////////////////
   enemigos: {
-    esqueleto:    { vida: 18,   dano: 6,  velocidad: 0.6, espiritualidad: 1,  xp: 1,  cdAtaque: 55,  rango: 26,   radio: 12 },
+    esqueleto:    { vida: 8,   dano: 6,  velocidad: 0.6, espiritualidad: 1,  xp: 1,  cdAtaque: 55,  rango: 26,   radio: 12 },
     bestia:       { vida: 30,   dano: 9,  velocidad: 3,   espiritualidad: 2,  xp: 3,  cdAtaque: 45,  rango: 28,   radio: 12 },
     // El hombre reptil avanza zigzagueando (ver Enemigo._perseguir).
     hombreReptil: { vida: 10,   dano: 12, velocidad: 4,   espiritualidad: 3,  xp: 5,  cdAtaque: 40,  rango: 24,   radio: 12 },
@@ -134,7 +134,7 @@ const CONFIG = {
   armas: {
     // Daga de Obsidiana (arma inicial): golpe chico al más cercano.
     daga: {
-      golpe: { cdMin: 25, cdBase: 90, cdPorNivel: 3, danoBase: 3, danoPorNivel: 3, alcance: 150, radio: 26 },
+      golpe: { cdMin: 25, cdBase: 25, cdPorNivel: 3, danoBase: 3, danoPorNivel: 3, alcance: 150, radio: 26 },
       // Evolución: Macuahuitl — corte en semicírculo que roba vida.
       macuahuitl: { cdMin: 26, cdBase: 60, cdPorNivel: 3, danoBase: 16, danoPorNivel: 5, radio: 130, roboVida: 0.5, empuje: 3 },
     },

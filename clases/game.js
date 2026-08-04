@@ -86,6 +86,8 @@ class Game {
         this.barraJugador = null;
         this.flechaBoss = null;
         this.enemigos = [];
+        this.grilla = new Grilla(40);
+        this._grillaDebug = null
         this.consumibles = [];
         this.proyEnemigos = [];
         this.textosDano = [];
@@ -139,6 +141,7 @@ class Game {
         Enemigo.alRecibirDano = (dano) => {
             if (this.jugador.roboVida > 0) this.jugador.curar(dano * this.jugador.roboVida);
         };
+        window.verGrilla = () => this._toggleGrillaDebug();
 
         app.ticker.add(ticker => this._loop(ticker.deltaTime));
         this._mostrarFase('🌴 La Selva Olvidada — ¡Sobreviví 30 minutos!');
@@ -644,6 +647,8 @@ class Game {
         this.segundos += delta / 60;
 
         this._actualizarFase();
+        this.grilla.reconstruir(this.enemigos);
+        if (this._grillaDebug && this._grillaDebug.visible) this._dibujarGrillaDebug();
         this.jugador.update(delta);
         if (this._procesarSubidaDeNivel()) return;
 
@@ -692,7 +697,8 @@ class Game {
     }
 
     _actualizarManifestaciones(delta) {
-        for (const m of this.jugador.manifestaciones) m.update(delta, this.enemigos);
+        for (const m of this.jugador.manifestaciones)
+            m.update(delta, this.enemigos, this.grilla);
     }
 
     _actualizarEnemigos(delta) {
@@ -708,28 +714,22 @@ class Game {
     }
 
     _separarEnemigosEntreSi() {
-        for (let i = 0; i < this.enemigos.length; i++) {
-            const a = this.enemigos[i];
-            for (let j = i + 1; j < this.enemigos.length; j++) {
-                const b = this.enemigos[j];
+        const RADIO_BUSQUEDA = 40; // cubre el radio de colisión de dos enemigos solapados
+        for (const a of this.enemigos) {
+            if (a.estacionario) continue;
+            const vecinos = this.grilla.consultarRadio(a.x, a.y,
+                RADIO_BUSQUEDA);
+            for (const b of vecinos) {
+                if (b === a) continue;
                 const dx = b.x - a.x;
                 const dy = b.y - a.y;
                 const dist = Math.hypot(dx, dy);
                 const minDist = a.radio + b.radio;
-                if (dist >= minDist || dist === 0) continue; // no se tocan (o están en el mismo punto)
+                if (dist >= minDist || dist === 0) continue;
 
-                // cuánto se solapan, repartido mitad y mitad
                 const empuje = (minDist - dist) / 2;
-                const nx = dx / dist; // dirección normalizada de a hacia b
-                const ny = dy / dist;
-                if (!a.estacionario) {
-                    a.x -= nx * empuje;
-                    a.y -= ny * empuje;
-                }
-                if (!b.estacionario) {
-                    b.x += nx * empuje;
-                    b.y += ny * empuje;
-                }
+                a.x -= (dx / dist) * empuje;
+                a.y -= (dy / dist) * empuje;
             }
         }
     }
@@ -908,6 +908,33 @@ class Game {
             fx + Math.cos(ang - 2.5) * 12, fy + Math.sin(ang - 2.5) * 12,
         ]).fill({color: 0xff3333, alpha: 0.6});
     }
+    //////////////////////////////////////////////////
+    // DEBUG
+    //////////////////////////////////////////////////
+
+    _toggleGrillaDebug() {
+        if (!this._grillaDebug) {
+            this._grillaDebug = new PIXI.Graphics();
+            this.world.addChild(this._grillaDebug); // hijo de world: se mueve con la cámara
+        }
+        this._grillaDebug.visible = !this._grillaDebug.visible;
+        console.log('Grilla debug:', this._grillaDebug.visible ? 'ON' : 'OFF');
+    }
+
+    _dibujarGrillaDebug() {
+        const g = this._grillaDebug;
+        g.clear();
+        const tam = this.grilla.tamCelda;
+        for (const [clave, balde] of this.grilla.celdas) {
+            const [cx, cy] = clave.split(',').map(Number);
+            const x = cx * tam, y = cy * tam;
+            const ocupacion = Math.min(1, balde.length / 5); // celdas más pobladas, más rojas
+            g.rect(x, y, tam, tam)
+                .fill({color: 0xff3300, alpha: 0.06 + ocupacion * 0.25})
+                .stroke({width: 1, color: 0x00ffff, alpha: 0.35});
+        }
+    }
+
 }
 
 /* ── utilidades de módulo ── */

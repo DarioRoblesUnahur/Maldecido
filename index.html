@@ -278,12 +278,13 @@
     (function () {
       // Versión de la release: subir en cada deploy.
       // Alimenta el cache-busting (?v=) y la etiqueta del menú.
-      const VERSION = '0.4';
+      const VERSION = '0.41';
       document.getElementById('version-label').textContent = 'v' + VERSION + ' — 2026';
 
       const scripts = [
         'pixi.js',
         'clases/config.js',
+        'clases/grilla.js',
         'clases/base/gameObject.js',
         'clases/base/entidadConSalud.js',
         'clases/jugador.js',
