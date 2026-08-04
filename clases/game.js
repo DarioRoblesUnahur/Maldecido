@@ -139,7 +139,7 @@ class Game {
   }
 
   async _cargarAssets() {
-    const [playerRun, playerIdle, playerMuerte, esqueleto, bestia, reptil, golem, jefe, hechicero] =
+    const [playerRun, playerIdle, playerMuerte, esqueleto, bestia, reptil, golem, jefe, hechicero, pisoTile] =
       await Promise.all([
         PIXI.Assets.load('assets/playerWalk.png'),
         PIXI.Assets.load('assets/playerIdle.png'),
@@ -150,21 +150,19 @@ class Game {
         PIXI.Assets.load('assets/golemWalk.png'),
         PIXI.Assets.load('assets/jefeFinalWalk.png'),
         PIXI.Assets.load('assets/magosShoot.png'),
+        PIXI.Assets.load('assets/pisoTile.png'),
       ]);
-    this.texturas = { playerRun, playerIdle, playerMuerte, esqueleto, bestia, reptil, golem, jefe, hechicero };
+    pisoTile.source.addressMode = 'repeat';
+    this.texturas = { playerRun, playerIdle, playerMuerte, esqueleto, bestia, reptil, golem, jefe, hechicero, pisoTile };
     window._TEX = { esqueleto, bestia, reptil, golem, jefe, hechicero };
   }
 
   _crearSuelo() {
-    const tileG = new PIXI.Graphics();
-    tileG.rect(0, 0, 96, 96).fill(0x1c3312);
-    for (let i = 0; i < 40; i++) {
-      const x = Math.random() * 96, y = Math.random() * 96, r = 2 + Math.random() * 5;
-      const c = Math.random() < 0.5 ? 0x16280e : 0x24401a;
-      tileG.circle(x, y, r).fill({ color: c, alpha: 0.7 });
-    }
-    const tileTex = this.app.renderer.generateTexture(tileG);
-    this.floor = new PIXI.TilingSprite({ texture: tileTex, width: this.app.screen.width, height: this.app.screen.height });
+    this.floor = new PIXI.TilingSprite({
+      texture: this.texturas.pisoTile,
+      width: this.app.screen.width,
+      height: this.app.screen.height,
+    });
     this.app.stage.addChild(this.floor);
   }
 
