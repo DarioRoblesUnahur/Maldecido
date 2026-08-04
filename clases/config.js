@@ -134,7 +134,7 @@ const CONFIG = {
   armas: {
     // Daga de Obsidiana (arma inicial): golpe chico al más cercano.
     daga: {
-      golpe: { cdMin: 14, cdBase: 40, cdPorNivel: 3, danoBase: 8, danoPorNivel: 3, alcance: 200, radio: 26 },
+      golpe: { cdMin: 25, cdBase: 90, cdPorNivel: 3, danoBase: 3, danoPorNivel: 3, alcance: 150, radio: 26 },
       // Evolución: Macuahuitl — corte en semicírculo que roba vida.
       macuahuitl: { cdMin: 26, cdBase: 60, cdPorNivel: 3, danoBase: 16, danoPorNivel: 5, radio: 130, roboVida: 0.5, empuje: 3 },
     },
@@ -161,8 +161,7 @@ const CONFIG = {
     // Cóndor Vigía: picada sobre un enemigo al azar.
     condor: {
       cdMin: 35, cdBase: 120, cdPorNivel: 9, alcance: 460,
-      danoBase: 40, danoPorNivel: 22, multDanoEvo: 1.6,
-      radio: 30, radioEvo: 70,                        // radio del impacto
+      danoBase: 40, danoPorNivel: 22, multDanoEvo: 1.6, radioEvo: 200,                        // radio del impacto
       picada: { duracion: 12, altura: 180, extra: 8 },
     },
 

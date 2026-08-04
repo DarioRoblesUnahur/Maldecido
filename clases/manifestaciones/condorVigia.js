@@ -21,8 +21,7 @@ class CondorVigia extends Manifestacion {
     const cercanos = enemigos.filter(e => e.distanciaA(this.jugador) < c.alcance);
     if (!cercanos.length) return;
     const obj = cercanos[Math.floor(Math.random() * cercanos.length)];
-    const g = _Vistas.bestia(0.8);
-    g.tint = 0x88ccff; g.rotation = Math.PI / 2;
+    const g = this.evolucionada ? _Vistas.guardian() : _Vistas.condor();
     g.x = obj.x; g.y = obj.y - c.picada.altura;
     this.world.addChild(g);
     this.picadas.push({ g, obj, ox: obj.x, oy: obj.y, t: 0, total: c.picada.duracion, hecho: false });
@@ -40,10 +39,16 @@ class CondorVigia extends Manifestacion {
       p.g.x = tx; p.g.y = ty - c.picada.altura * (1 - k);
       if (!p.hecho && k >= 1) {
         p.hecho = true;
-        const dano = this._dmg(c.danoBase + this.nivel * c.danoPorNivel) * (this.evolucionada ? c.multDanoEvo : 1);
-        const radio = this.evolucionada ? c.radioEvo : c.radio;
-        for (const e of enemigos) {
-          if (e.distanciaXY(tx, ty) < radio) e.recibirDano(dano);
+        const dano = this._dmg(c.danoBase +
+            this.nivel * c.danoPorNivel) * (this.evolucionada ?
+            c.multDanoEvo : 1);
+        if (this.evolucionada) {
+          for (const e of enemigos) {
+            if (e.distanciaXY(tx, ty) < c.radioEvo)
+              e.recibirDano(dano);
+          }
+        } else if (p.obj && !p.obj.muerto) {
+          p.obj.recibirDano(dano);
         }
       }
       if (p.t > p.total + c.picada.extra) { p.g.destroy(); this.picadas.splice(i, 1); }
