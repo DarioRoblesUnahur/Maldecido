@@ -57,4 +57,10 @@ const _Vistas = {
     machete(escala = 0.4) {
         return _estSpr(window._TEX.machete, escala);
     },
+    espectral(escala = 0.2) {
+        return _estSpr(window._TEX.espectral, escala);
+    },
+    infernal(escala = 0.3) {
+        return _estSpr(window._TEX.infernal, escala);
+    },
 };

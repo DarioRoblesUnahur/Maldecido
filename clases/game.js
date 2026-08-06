@@ -161,7 +161,9 @@ class Game {
             condor,
             guardian,
             daga,
-            machete
+            machete,
+            espectral,
+            infernal,
         ] =
             await Promise.all([
                 PIXI.Assets.load('assets/playerWalk.png'),
@@ -177,7 +179,9 @@ class Game {
                 PIXI.Assets.load('assets/condorVigia.png'),
                 PIXI.Assets.load('assets/guardianCelestial.png'),
                 PIXI.Assets.load('assets/dagaDeObsidiana.png'),
-                PIXI.Assets.load('assets/macuahuitl.png')
+                PIXI.Assets.load('assets/macuahuitl.png'),
+                PIXI.Assets.load('assets/jaguarEspectral.png'),
+                PIXI.Assets.load('assets/jaguarInfernal.png'),
             ]);
         pisoTile.source.addressMode = 'repeat';
         this.texturas = {
@@ -195,6 +199,8 @@ class Game {
             guardian,
             daga,
             machete,
+            espectral,
+            infernal,
         };
         window._TEX = {
             esqueleto,
@@ -206,6 +212,8 @@ class Game {
             guardian,
             daga,
             machete,
+            espectral,
+            infernal,
         };
     }
 

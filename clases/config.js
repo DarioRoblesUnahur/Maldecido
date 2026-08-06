@@ -16,7 +16,7 @@ const CONFIG = {
   //////////////////////////////////////////////////
   partida: {
     duracionMin: 30,    // minutos hasta que aparece el jefe final
-    maxEnemigos: 500,   // tope de enemigos vivos a la vez (performance)
+    maxEnemigos: 2000,   // tope de enemigos vivos a la vez (performance)
 
     // La dificultad escala la VIDA de los enemigos al aparecer:
     //   dificultad = 1 + minutos * incrementoPorMinuto
@@ -134,15 +134,15 @@ const CONFIG = {
   armas: {
     // Daga de Obsidiana (arma inicial): golpe chico al más cercano.
     daga: {
-      golpe: { cdMin: 25, cdBase: 25, cdPorNivel: 3, danoBase: 3, danoPorNivel: 3, alcance: 150, radio: 26 },
+      golpe: { cdMin: 25, cdBase: 60, cdPorNivel: 3, danoBase: 3, danoPorNivel: 3, alcance: 150, radio: 26 },
       // Evolución: Macuahuitl — corte en semicírculo que roba vida.
-      macuahuitl: { cdMin: 26, cdBase: 60, cdPorNivel: 3, danoBase: 16, danoPorNivel: 5, radio: 130, roboVida: 0.5, empuje: 3 },
+      macuahuitl: { cdMin: 15, cdBase: 30, cdPorNivel: 3, danoBase: 16, danoPorNivel: 5, radio: 250, roboVida: 0.5, empuje: 3 },
     },
 
     // Jaguares Espectrales: orbitan al jugador y dañan al contacto.
     jaguares: {
       maxFelinos: 8,                        // cantidad = min(maxFelinos, 1 + nivel)
-      radio: 78, radioEvo: 110,             // radio de la órbita
+      radio: 90, radioEvo: 150,             // radio de la órbita
       giroBase: 0.04, giroPorNivel: 0.004,  // velocidad de giro
       dpsBase: 10, dpsPorNivel: 4,          // daño por segundo de CADA felino
       golpeRadio: 20, golpeRadioEvo: 30, golpeMargen: 12,
